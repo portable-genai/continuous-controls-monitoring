@@ -136,7 +136,7 @@ sharp because it both reads from and writes back to a sibling (see
   read through `ControlEvidencePort`.
 - **Hrz7** human-review / maker-checker console: every `requires_human_review` exception is routed
   to it over the shared `review-kit` (rule R8); you wire your endpoint
-  (`HRZ_HUMAN_REVIEW_URL`), you do not re-implement the console.
+  (`HUMAN_REVIEW_URL`), you do not re-implement the console.
 - **Hrz5** observability plus immutable WORM audit: audit events and trace spans go to it.
 - **Hrz4** AI-quality / model-risk gate: owns promotion. `eval/run_eval.py --mode gate` is the
   client half and refuses to run off the managed profile.
