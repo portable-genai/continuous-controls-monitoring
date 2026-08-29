@@ -476,7 +476,7 @@ class DemoRun:
             title="Next actions",
             rows=(
                 Row("Control owner", "open the queued exception and remediate or accept it"),
-                Row("Operator", "point HRZ_HUMAN_REVIEW_URL at the console and flush the outbox"),
+                Row("Operator", "point HUMAN_REVIEW_URL at the console and flush the outbox"),
             ),
         )
         return [queue, findings, actions], {"pending": len(pending), "wire_leak": leaked}
