@@ -22,12 +22,15 @@ class CloudEvidenceScanner:
         if pack.test_kind is TestKind.THRESHOLD:
             from google.cloud import securitycenter_v1
 
-            client = securitycenter_v1.SecurityCenterClient()
-            return _from_scc(client, pack)  # pragma: no cover - needs live SCC
+            # Distinct names, because these are different clients. Reusing one name bound
+            # its type to whichever branch came first, so the second assignment was a type
+            # error that only a checker able to SEE the SDK could report.
+            scc_client = securitycenter_v1.SecurityCenterClient()
+            return _from_scc(scc_client, pack)  # pragma: no cover - needs live SCC
         from google.cloud import asset_v1
 
-        client = asset_v1.AssetServiceClient()
-        return _from_asset_inventory(client, pack)  # pragma: no cover - needs live CAI
+        asset_client = asset_v1.AssetServiceClient()
+        return _from_asset_inventory(asset_client, pack)  # pragma: no cover - needs live CAI
 
 
 def _from_asset_inventory(
