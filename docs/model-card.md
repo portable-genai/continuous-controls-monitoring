@@ -40,12 +40,12 @@ record; the model is a bounded, replaceable component that writes one paragraph.
 | Profile | Generation adapter | Behaviour |
 |---|---|---|
 | `local` | `adapters/local/generation.py` (`LocalNarrationGenerator`) | No model call. It restates the FACTS block the prompt carries, so every figure in its output is one the engine produced and the groundedness check passes offline. It exercises the REAL narration path rather than dodging the validation. |
-| `gcp` | `adapters/gcp/generation.py` (`VertexNarrationGenerator`) | Gemini via `google.generativeai`, imported lazily as the first statement of `generate` so an offline caller gets an ImportError at call time rather than at construction. Model id pinned in the module as `_MODEL`, currently `gemini-2.5-flash`, with a system instruction that states the no-new-figures rule. |
+| `gcp` | `adapters/gcp/generation.py` (`VertexNarrationGenerator`) | Gemini via `google.generativeai`, imported lazily as the first statement of `generate` so an offline caller gets an ImportError at call time rather than at construction. Model id pinned in the module as `_MODEL`, currently `gemini-3.5-flash`, with a system instruction that states the no-new-figures rule. |
 | `onprem` | `adapters/onprem/generation.py` (`OnPremNarrationGenerator`) | Fail-fast placeholder: raises, naming the client-hosted model gateway to bind. |
 
 ## Remaining controls (TODO, repo owner)
 
-- **Model id, version and region** (P-07): `gemini-2.5-flash` is a module constant, not a
+- **Model id, version and region** (P-07): `gemini-3.5-flash` is a module constant, not a
   confirmed deployment decision, and it is not reachable from configuration: there is no
   settings key or environment variable for it. Confirm the id is served in your deployment region,
   pin the exact version, lift it into `config/settings.yaml`, and record it here. Gemini model ids

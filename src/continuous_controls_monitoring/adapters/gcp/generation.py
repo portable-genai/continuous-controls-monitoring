@@ -19,7 +19,7 @@ from __future__ import annotations
 
 from ...config import Settings
 
-_MODEL = "gemini-2.5-flash"
+_MODEL = "gemini-3.5-flash"
 _SYSTEM = "You restate control-test facts as JSON. You never introduce a figure not given."
 
 
