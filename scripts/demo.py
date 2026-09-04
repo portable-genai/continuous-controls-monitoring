@@ -78,7 +78,7 @@ def loaded_cloud_sdks() -> tuple[str, ...]:
 
 #: Rendered identity, bound once so no other line's length depends on how long a name is.
 SERVICE_NAME = "Continuous Controls Monitoring"
-CATALOG_ID = "Aud2"
+CATALOG_ID = "continuous-controls-monitoring"
 REPOSITORY = "continuous-controls-monitoring"
 
 # --------------------------------------------------------------------------------------- #
@@ -338,7 +338,6 @@ class DemoRun:
             title="Deployment",
             rows=(
                 Row("Service", SERVICE_NAME),
-                Row("Catalog id", CATALOG_ID),
                 Row("Profile", self.settings.profile, "ok"),
                 Row("Profiles bound for every port", ", ".join(profiles)),
                 Row("Residency region", self.settings.region),
@@ -658,7 +657,9 @@ class DemoRun:
                     monitored.review_ref or "not routed (passing)",
                     "ok" if consistent else "bad",
                 ),
-                Row("Written back to Rgc7", monitored.writeback_ref or "n/a"),
+                Row(
+                    "Written back to obligations-control-mapping", monitored.writeback_ref or "n/a"
+                ),
                 Row("Attributed to", ACTOR),
             ),
             note=(
@@ -696,7 +697,6 @@ class DemoRun:
         current = self.results[-1]
         return {
             "service": SERVICE_NAME,
-            "catalog_id": CATALOG_ID,
             "repository": REPOSITORY,
             "profile": self.settings.profile,
             "region": self.settings.region,

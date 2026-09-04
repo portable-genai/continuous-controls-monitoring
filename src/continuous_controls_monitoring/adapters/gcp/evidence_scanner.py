@@ -1,8 +1,9 @@
 """Managed EvidenceScannerPort: Cloud Asset Inventory + Security Command Center evidence.
 
-Mirrors Rsk3's ``adapters/gcp/cloud_asset_scanner.py``: the config-scan and threshold evidence
-come from Cloud Asset Inventory and Security Command Center. The SDK imports are lazy (inside
-:meth:`scan`), so the offline profiles construct this adapter with no cloud SDK present.
+Mirrors architecture-validator's ``adapters/gcp/cloud_asset_scanner.py``: the config-scan and
+threshold evidence come from Cloud Asset Inventory and Security Command Center. The SDK imports are
+lazy (inside :meth:`scan`), so the offline profiles construct this adapter with no cloud SDK
+present.
 """
 
 from __future__ import annotations

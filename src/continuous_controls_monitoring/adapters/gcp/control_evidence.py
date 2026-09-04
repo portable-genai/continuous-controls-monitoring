@@ -1,7 +1,8 @@
-"""Managed ControlEvidencePort: READ Rsk1's cloud control evidence-pack surface (ex-Rsk2).
+"""Managed ControlEvidencePort: READ compliance-advisory's cloud control evidence-pack surface
+(formerly the cloud control-mapping toolkit).
 
-Authenticated with a Google-signed OIDC ID token addressed to Rsk1's audience (the lazy
-``google.auth`` import is the offline ImportError point); the HTTP is stdlib ``urllib``.
+Authenticated with a Google-signed OIDC ID token addressed to compliance-advisory's audience (the
+lazy ``google.auth`` import is the offline ImportError point); the HTTP is stdlib ``urllib``.
 """
 
 from __future__ import annotations
@@ -17,7 +18,9 @@ from ...domain.models import EvidenceRecord, TestKind
 
 
 class RemoteControlEvidence:
-    """Fetch Rsk1 evidence packs over their REST surface under the managed profile."""
+    """Fetch compliance-advisory evidence packs over their REST surface
+    under the managed profile.
+    """
 
     def __init__(self, settings: Settings) -> None:
         self._settings = settings
@@ -32,7 +35,7 @@ class RemoteControlEvidence:
         try:
             with urllib.request.urlopen(req, timeout=10) as resp:  # noqa: S310 - fixed https base
                 body = json.loads(resp.read().decode("utf-8"))
-        except urllib.error.HTTPError:  # pragma: no cover - needs live Rsk1
+        except urllib.error.HTTPError:  # pragma: no cover - needs live compliance-advisory
             return ()
         return tuple(_record_from_json(control_id, item) for item in body.get("records", []))
 
@@ -46,7 +49,7 @@ class RemoteControlEvidence:
 
 def _record_from_json(
     control_id: str, item: Any
-) -> EvidenceRecord:  # pragma: no cover - needs live Rsk1
+) -> EvidenceRecord:  # pragma: no cover - needs live compliance-advisory
     return EvidenceRecord(
         control_id=control_id,
         kind=TestKind(str(item.get("kind", "access_recert"))),

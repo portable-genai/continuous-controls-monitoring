@@ -1,4 +1,6 @@
-"""On-prem ControlEvidencePort: fail-fast placeholder (bind the client's own Rsk1 evidence)."""
+"""On-prem ControlEvidencePort: fail-fast placeholder (bind the client's own compliance-advisory
+evidence).
+"""
 
 from __future__ import annotations
 
@@ -14,6 +16,7 @@ class OnPremControlEvidence:
 
     def fetch(self, control_id: str) -> tuple[EvidenceRecord, ...]:
         raise NotImplementedError(
-            "on-prem control evidence is a portability placeholder: bind the client's own Rsk1 "
+            "on-prem control evidence is a portability placeholder: bind the client's own "
+            "compliance-advisory "
             "evidence-pack surface (see docs/onprem-migration.md)"
         )

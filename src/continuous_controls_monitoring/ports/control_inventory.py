@@ -1,9 +1,10 @@
-"""ControlInventoryPort: READ the Rgc7 control inventory. This repo keeps no parallel catalog.
+"""ControlInventoryPort: READ the obligations-control-mapping control inventory. This repo keeps no
+parallel catalog.
 
-Per the control-triad boundary, Rgc7 is the single system of record for the
-obligation to policy to control to evidence graph. Aud2 reads the control inventory and writes
-effectiveness results back; it never stores control-catalog membership of its own. This port is
-the read side; ``ports/writeback.py`` is the write-back side.
+Per the control-triad boundary, obligations-control-mapping is the single system of record for the
+obligation to policy to control to evidence graph. continuous-controls-monitoring reads the control
+inventory and writes effectiveness results back; it never stores control-catalog membership of its
+own. This port is the read side; ``ports/writeback.py`` is the write-back side.
 
 Cross-tenant authorisation is the port's, not a caller's: :meth:`get_control` returns ``None``
 for a control that does not exist, but raises :class:`CrossTenantError` (a 403, never a 404) for

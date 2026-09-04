@@ -126,7 +126,7 @@ def test_the_scan_excludes_the_actor_so_it_can_ever_be_green() -> None:
     ``actor`` is the verified principal and is an address by design. A well-meaning "scan the
     whole record" change would make every run fail on the attribution column, and the next person
     would relax the threshold rather than narrow the scan. The same holds for ``maker`` on the
-    Hrz7 payload, which :func:`run_eval.review_texts` drops for the same reason.
+    human-review-console payload, which :func:`run_eval.review_texts` drops for the same reason.
     """
     row: dict[str, Any] = {**_CLEAN_ROW, "actor": "analyst@bank.example"}
     assert ev.pii_safety(ev.audit_texts([row]), _PLANTED) == 1.0

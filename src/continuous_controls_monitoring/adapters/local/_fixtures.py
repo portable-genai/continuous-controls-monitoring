@@ -1,10 +1,10 @@
 """Deterministic offline fixtures shared by the local inventory / scanner / evidence adapters.
 
-One consistent synthetic estate so the three offline adapters agree: the inventory names exactly
-the controls the packs test, the scanner returns config/transaction/threshold evidence for the
-scanner-sourced controls, and the Rsk1 evidence pack returns the access-recertification records
-for the control whose evidence source is Rsk1. Every party is obviously fictional and every host
-is a ``.example`` domain, per the synthetic-data rule.
+One consistent synthetic estate so the three offline adapters agree: the inventory names exactly the
+controls the packs test, the scanner returns config/transaction/threshold evidence for the
+scanner-sourced controls, and the compliance-advisory evidence pack returns the
+access-recertification records for the control whose evidence source is compliance-advisory. Every
+party is obviously fictional and every host is a ``.example`` domain, per the synthetic-data rule.
 
 The estate is deliberately mixed: one control drifts (a config exception), the rest are clean, so
 the demo and the service integration tests exercise both a PASS and a routed FAIL.
@@ -26,7 +26,11 @@ _SC7 = InventoryControl(
     owner="sc7-owner@bank.example",
     framework="NIST 800-53",
     sox_significant=True,
-    citations=(Citation(source_id="rgc7:SC-7-egress", title="Rgc7 control inventory"),),
+    citations=(
+        Citation(
+            source_id="rgc7:SC-7-egress", title="obligations-control-mapping control inventory"
+        ),
+    ),
 )
 _AC2 = InventoryControl(
     control_id="AC-2-recert",
@@ -34,7 +38,11 @@ _AC2 = InventoryControl(
     owner="ac2-owner@bank.example",
     framework="NIST 800-53",
     sox_significant=True,
-    citations=(Citation(source_id="rgc7:AC-2-recert", title="Rgc7 control inventory"),),
+    citations=(
+        Citation(
+            source_id="rgc7:AC-2-recert", title="obligations-control-mapping control inventory"
+        ),
+    ),
 )
 _TX = InventoryControl(
     control_id="TX-settle-dualauth",
@@ -42,7 +50,12 @@ _TX = InventoryControl(
     owner="tx-owner@bank.example",
     framework="COSO",
     sox_significant=True,
-    citations=(Citation(source_id="rgc7:TX-settle-dualauth", title="Rgc7 control inventory"),),
+    citations=(
+        Citation(
+            source_id="rgc7:TX-settle-dualauth",
+            title="obligations-control-mapping control inventory",
+        ),
+    ),
 )
 _SEC = InventoryControl(
     control_id="SEC-patch-sla",
@@ -50,16 +63,26 @@ _SEC = InventoryControl(
     owner="sec-owner@bank.example",
     framework="NIST 800-53",
     sox_significant=False,
-    citations=(Citation(source_id="rgc7:SEC-patch-sla", title="Rgc7 control inventory"),),
+    citations=(
+        Citation(
+            source_id="rgc7:SEC-patch-sla", title="obligations-control-mapping control inventory"
+        ),
+    ),
 )
 _OTHER = InventoryControl(
     control_id="OTHER-only-control",
     title="A control owned by another tenant",
     owner="owner@other.example",
-    citations=(Citation(source_id="rgc7:OTHER-only-control", title="Rgc7 control inventory"),),
+    citations=(
+        Citation(
+            source_id="rgc7:OTHER-only-control",
+            title="obligations-control-mapping control inventory",
+        ),
+    ),
 )
 
-#: tenant -> control id -> control. The single offline copy of what a read of Rgc7 returns.
+#: tenant -> control id -> control. The single offline copy of what a read of
+#: obligations-control-mapping returns.
 CONTROLS: dict[str, dict[str, InventoryControl]] = {
     DEMO_TENANT: {
         _SC7.control_id: _SC7,
@@ -71,7 +94,8 @@ CONTROLS: dict[str, dict[str, InventoryControl]] = {
 }
 
 #: Scanner evidence (Cloud Asset Inventory / Security Command Center / transaction sampler
-#: offline stand-ins), keyed by control id. AC-2 is absent here: its evidence comes from Rsk1.
+#: offline stand-ins), keyed by control id. AC-2 is absent here: its evidence comes from
+#: compliance-advisory.
 SCANNER_EVIDENCE: dict[str, tuple[EvidenceRecord, ...]] = {
     "SC-7-egress": (
         EvidenceRecord(
@@ -121,7 +145,8 @@ SCANNER_EVIDENCE: dict[str, tuple[EvidenceRecord, ...]] = {
     ),
 }
 
-#: Rsk1 cloud control evidence packs (the ex-Rsk2 surface), keyed by control id. AC-2's access
+#: compliance-advisory cloud control evidence packs (the formerly the cloud control-mapping toolkit
+#: surface), keyed by control id. AC-2's access
 #: recertification evidence lives ONLY here, so removing this source flips AC-2 pass -> fail.
 RSK1_EVIDENCE: dict[str, tuple[EvidenceRecord, ...]] = {
     "AC-2-recert": (

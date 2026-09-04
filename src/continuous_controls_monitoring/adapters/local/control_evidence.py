@@ -1,9 +1,10 @@
-"""Local ControlEvidencePort: canned Rsk1 cloud control evidence packs (the ex-Rsk2 surface).
+"""Local ControlEvidencePort: canned compliance-advisory cloud control evidence packs (the formerly
+the cloud control-mapping toolkit surface).
 
-Returns the offline Rsk1 evidence for a control. The access-recertification control's evidence
-lives only here, so a test that swaps this adapter for one returning nothing flips that control
-from pass to fail, which is the slice proof that the Rsk1 source is a real dependency and not
-decoration.
+Returns the offline compliance-advisory evidence for a control. The access-recertification control's
+evidence lives only here, so a test that swaps this adapter for one returning nothing flips that
+control from pass to fail, which is the slice proof that the compliance-advisory source is a real
+dependency and not decoration.
 """
 
 from __future__ import annotations
@@ -14,7 +15,7 @@ from . import _fixtures
 
 
 class LocalControlEvidence:
-    """Serve canned Rsk1 evidence packs for the SDK-free profile."""
+    """Serve canned compliance-advisory evidence packs for the SDK-free profile."""
 
     def __init__(self, settings: Settings) -> None:
         self._settings = settings

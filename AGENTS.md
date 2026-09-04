@@ -7,7 +7,7 @@ here. Read it first. This file carries only what is specific to this one.
 
 ## What this is
 
-Continuous Controls Monitoring (Aud2): Continuously tests key controls, scores effectiveness, and narrates auditor-ready exceptions.
+Continuous Controls Monitoring (`continuous-controls-monitoring`): Continuously tests key controls, scores effectiveness, and narrates auditor-ready exceptions.
 Rendered from `hex-service-template`, so it starts at reference parity rather than converging
 toward it. Package `continuous_controls_monitoring`, environment prefix
 `CCM`, region `asia-southeast1`.

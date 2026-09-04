@@ -1,9 +1,11 @@
-"""Managed EffectivenessWritebackPort: WRITE results to Rgc7's effectiveness write-back endpoint.
+"""Managed EffectivenessWritebackPort: WRITE results to obligations-control-mapping's effectiveness
+write-back endpoint.
 
-Appends the result as an evidence node linked to the tested control via Rgc7's authenticated
-write-back API. The lazy ``google.auth`` import is the offline ImportError point; the HTTP is
-stdlib ``urllib``. Rgc7 rejects an unknown control id with a 404, which this adapter surfaces as
-:class:`UnknownControlError` rather than swallowing.
+Appends the result as an evidence node linked to the tested control via
+obligations-control-mapping's authenticated write-back API. The lazy ``google.auth`` import is the
+offline ImportError point; the HTTP is stdlib ``urllib``. obligations-control-mapping rejects an
+unknown control id with a 404, which this adapter surfaces as :class:`UnknownControlError` rather
+than swallowing.
 """
 
 from __future__ import annotations
@@ -18,7 +20,9 @@ from ...ports.writeback import UnknownControlError
 
 
 class RemoteEffectivenessWriteback:
-    """Append effectiveness evidence nodes to Rgc7 under the managed profile."""
+    """Append effectiveness evidence nodes to obligations-control-mapping
+    under the managed profile.
+    """
 
     def __init__(self, settings: Settings) -> None:
         self._settings = settings
@@ -46,10 +50,13 @@ class RemoteEffectivenessWriteback:
         try:
             with urllib.request.urlopen(req, timeout=10) as resp:  # noqa: S310 - fixed https base
                 body = json.loads(resp.read().decode("utf-8"))
-        except urllib.error.HTTPError as exc:  # pragma: no cover - needs live Rgc7
+        except (
+            urllib.error.HTTPError
+        ) as exc:  # pragma: no cover - needs live obligations-control-mapping
             if exc.code == 404:
                 raise UnknownControlError(
-                    f"Rgc7 rejected the write-back: control {result.control_id!r} is unknown"
+                    f"obligations-control-mapping rejected the write-back: control "
+                    f"{result.control_id!r} is unknown"
                 ) from exc
             raise
         return str(body.get("evidence_ref", ""))

@@ -9,14 +9,14 @@ It tests key controls continuously and grades them, rather than sampling them on
 each control:
 
 1. **Gather** the live evidence (`EvidenceScannerPort` for configuration, access and transaction
-   evidence; `ControlEvidencePort` for Rsk1's cloud control-evidence packs).
+   evidence; `ControlEvidencePort` for `compliance-advisory`'s cloud control-evidence packs).
 2. **Grade** it (`domain/testing.py`): per-kind detectors emit `ControlFinding`s, each dimension
    (design, operating) is scored separately, and `compute_verdict` turns the findings into a PASS
    or FAIL against the pack's gate severity.
 3. **Narrate** the exception (`domain/narration.py`): the model turns the engine's figures into an
    auditor-ready paragraph, and nothing else.
-4. **Route and record**: a consequential result goes to the Hrz7 console (rule R8), the
-   effectiveness result is written back to Rgc7 as an evidence node, and the score is appended to
+4. **Route and record**: a consequential result goes to the `human-review-console` (rule R8), the
+   effectiveness result is written back to `obligations-control-mapping` as an evidence node, and the score is appended to
    the effectiveness time series (BigQuery under the managed profile).
 
 ### What makes an effectiveness rating defensible?
@@ -48,8 +48,8 @@ DISCARDED and the caller falls back to the engine summary. See
 - **It will not grade a dimension it has no evidence for as effective.**
 - **It will not let a narrated paragraph introduce a number.**
 - **It will not auto-execute a consequential result.** An exception sets `requires_human_review`
-  and is ROUTED to Hrz7 in the same call that produced it.
-- **It will not keep a second control catalog.** The inventory is Rgc7's.
+  and is ROUTED to `human-review-console` in the same call that produced it.
+- **It will not keep a second control catalog.** The inventory is `obligations-control-mapping`'s.
 
 ### Which surfaces expose it?
 
@@ -62,17 +62,17 @@ UI: this is a control-plane service and `make drop-ui` has been run.
 
 | Concern | Owner | How this repo touches it |
 |---|---|---|
-| Continuous control testing and effectiveness grading | **this repo (Aud2)** | it IS the engine. |
-| The control inventory | **Rgc7** obligations and control mapping | READ through `ControlInventoryPort`. This repo keeps no parallel catalog. |
-| Coverage and evidence in the obligation graph | **Rgc7** | WRITTEN BACK through `EffectivenessWritebackPort` as evidence nodes, so a coverage figure there reflects what was actually tested. |
-| Cloud control-evidence packs | **Rsk1** compliance assistant (the former Rsk2 module) | READ through `ControlEvidencePort`. |
-| Agent discovery and entitlements | **Hrz3** agent registry | this agent publishes a card; the registry owns discovery. |
-| Model and agent promotion | **Hrz4** AI quality and model risk | `eval/run_eval.py --mode gate` asks Hrz4; the offline smoke mode never promotes. |
-| Traces and the immutable audit sink | **Hrz5** agent observability | `AuditSinkPort` and `ObservabilityTracerPort`. |
-| Human review and maker-checker | **Hrz7** human review console | `ReviewRouterPort` over the shared `review-kit`. This repo produces exceptions; it does not render a queue. |
-| Prompt-injection defence and output filtering | **Hrz1** agent guardrail gateway | **not wired today.** It becomes mandatory the moment untrusted free text (an operator note on an evidence record) reaches the narrator (rule R1). |
-| Grounded retrieval over an enterprise corpus | **Hrz2** enterprise knowledge base | not wired; this service reasons over evidence records, not documents. |
-| Issue and CAPA lifecycle after an exception | **Aud3** issue remediation and CAPA | this repo raises the exception; the remediation lifecycle belongs there. |
+| Continuous control testing and effectiveness grading | **this repo (`continuous-controls-monitoring`)** | it IS the engine. |
+| The control inventory | `obligations-control-mapping` and control mapping | READ through `ControlInventoryPort`. This repo keeps no parallel catalog. |
+| Coverage and evidence in the obligation graph | `obligations-control-mapping` | WRITTEN BACK through `EffectivenessWritebackPort` as evidence nodes, so a coverage figure there reflects what was actually tested. |
+| Cloud control-evidence packs | `compliance-advisory` (the former the cloud control-mapping toolkit module) | READ through `ControlEvidencePort`. |
+| Agent discovery and entitlements | `agent-registry` | this agent publishes a card; the registry owns discovery. |
+| Model and agent promotion | `model-quality-gate` AI quality and model risk | `eval/run_eval.py --mode gate` asks `model-quality-gate`; the offline smoke mode never promotes. |
+| Traces and the immutable audit sink | `agent-observability` agent observability | `AuditSinkPort` and `ObservabilityTracerPort`. |
+| Human review and maker-checker | `human-review-console` human review console | `ReviewRouterPort` over the shared `review-kit`. This repo produces exceptions; it does not render a queue. |
+| Prompt-injection defence and output filtering | `agent-guardrail-gateway` agent guardrail gateway | **not wired today.** It becomes mandatory the moment untrusted free text (an operator note on an evidence record) reaches the narrator (rule R1). |
+| Grounded retrieval over an enterprise corpus | `enterprise-knowledge-base` | not wired; this service reasons over evidence records, not documents. |
+| Issue and CAPA lifecycle after an exception | `issue-remediation-capa` issue remediation and CAPA | this repo raises the exception; the remediation lifecycle belongs there. |
 
 ### Can I demo it without a cloud project?
 
@@ -86,5 +86,5 @@ narrated claim, so a claim that stops being true fails a build rather than a mee
 
 The honest list is [`../practices-audit.md`](../practices-audit.md) and the `TODO (repo owner)`
 rows in [`../../COMPLIANCE.md`](../../COMPLIANCE.md). The two that matter most for a production
-decision: the Hrz1 guardrail binding before untrusted text reaches the narrator, and registering
-this repo's metric bundle with Hrz4 so `--mode gate` has an authority to ask.
+decision: the `agent-guardrail-gateway` binding before untrusted text reaches the narrator, and registering
+this repo's metric bundle with `model-quality-gate` so `--mode gate` has an authority to ask.

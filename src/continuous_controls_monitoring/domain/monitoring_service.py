@@ -4,15 +4,15 @@ This is the orchestration layer. The consequential decision is NOT here: it is i
 ``ControlTestEngine``. This service only coordinates the ports around that engine, in the order
 the discipline requires:
 
-1. READ the control from the Rgc7 inventory (never a parallel catalog);
-2. GATHER evidence from the scanner and from Rsk1's evidence packs;
-3. GRADE with the pure engine (design and operating effectiveness, deterministic);
-4. REDACT the graded result ONCE, at the edge of the service (see :func:`redacted_result`);
-5. write the audit record, WRITE the result back to Rgc7 as an evidence node, and export the
-   time-series row, all from the redacted projection;
-6. NARRATE an exception with the model, validate it against a schema and groundedness, and
-   DISCARD on failure (the model never produces a figure);
-7. ROUTE every exception to the control owner via Hrz7 (rule R8) and never auto-close.
+1. READ the control from the obligations-control-mapping inventory (never a parallel catalog); 2.
+   GATHER evidence from the scanner and from compliance-advisory's evidence packs; 3. GRADE with the
+   pure engine (design and operating effectiveness, deterministic); 4. REDACT the graded result
+   ONCE, at the edge of the service (see :func:`redacted_result`); 5. write the audit record, WRITE
+   the result back to obligations-control-mapping as an evidence node, and export the time-series
+   row, all from the redacted projection; 6. NARRATE an exception with the model, validate it
+   against a schema and groundedness, and DISCARD on failure (the model never produces a figure); 7.
+   ROUTE every exception to the control owner via human-review-console (rule R8) and never
+   auto-close.
 
 The model touches only step 6, and even there its output is discarded unless it is grounded in
 the engine's own figures.
@@ -84,7 +84,8 @@ def redacted_result(result: ControlTestResult) -> ControlTestResult:
     """The graded result with every CONTENT field masked and every FIGURE left alone.
 
     This is the one seam. A graded result reaches four sinks outside this service (the WORM
-    audit write, the Rgc7 write-back, the time-series export and the Hrz7 review payload) and
+    audit write, the obligations-control-mapping write-back, the time-series export and the
+    human-review-console review payload) and
     one inside the process that is really outside it under the managed profile (the model, via
     ``build_prompt``). Masking at each sink means getting it right five times, and the write-back
     and the export are the two nobody thinks of because today's adapters happen to serialise
@@ -99,7 +100,8 @@ def redacted_result(result: ControlTestResult) -> ControlTestResult:
     both :class:`EffectivenessScore` records, ``evidence_count``, ``decision``,
     ``requires_human_review``, ``as_of``, ``test_kind``, ``control_id`` and ``pack_id``. A
     masked figure would be a changed figure, and a masked control id would be rejected by the
-    Rgc7 write-back, which only ever attaches evidence to a control it already knows.
+    obligations-control-mapping write-back, which only ever attaches evidence to a control it
+    already knows.
     """
     return replace(
         result,
@@ -176,7 +178,8 @@ class MonitoringService:
 
         The engine grades the RAW evidence, because a masked figure would be a changed figure.
         Everything downstream of the grade is handed :func:`redacted_result` instead, so the
-        audit write, the Rgc7 write-back, the time-series export, the model and the Hrz7 payload
+        audit write, the obligations-control-mapping write-back, the time-series export, the model
+        and the human-review-console payload
         are covered by one masking step rather than by five that each have to remember.
 
         The engine's OWN result is what goes back to the caller. The API contract returns the
@@ -199,7 +202,8 @@ class MonitoringService:
 
             self._record_audit(outbound, actor=actor)
 
-            # Write the effectiveness evidence back to Rgc7 and export the time-series row. A
+            # Write the effectiveness evidence back to obligations-control-mapping and export the
+            # time-series row. A
             # result for a control that is not in the inventory has nothing to attach to, so it
             # is not written back (that is itself a design finding on the result).
             writeback_ref = ""

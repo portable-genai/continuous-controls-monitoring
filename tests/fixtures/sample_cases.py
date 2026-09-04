@@ -140,7 +140,8 @@ PII_CITATION = Citation(
 )
 
 #: The canonical pack for the redaction proofs: the SC-7 config scan, cited as above. Same
-#: control id, so the Rgc7 write-back accepts the result rather than rejecting an unknown id.
+#: control id, so the obligations-control-mapping write-back accepts the result rather than
+#: rejecting an unknown id.
 PII_CITATION_PACK: ControlTestPack = replace(
     PACK, pack_id="pack-egress-config-cited", citations=(PII_CITATION,)
 )

@@ -193,7 +193,7 @@ CANONICAL_CALLS: dict[str, PortCase] = {
         invoke=_inventory_invoke,
         answered=_inventory_answered,
         managed_refusal=(ImportError,),
-        detail="read the tenant's controls from the Rgc7 inventory",
+        detail="read the tenant's controls from the obligations-control-mapping inventory",
     ),
     "evidence_scanner": PortCase(
         invoke=_scanner_invoke,
@@ -205,13 +205,13 @@ CANONICAL_CALLS: dict[str, PortCase] = {
         invoke=_evidence_invoke,
         answered=_evidence_answered,
         managed_refusal=(ImportError,),
-        detail="fetch the Rsk1 evidence pack for a control",
+        detail="fetch the compliance-advisory evidence pack for a control",
     ),
     "writeback": PortCase(
         invoke=_writeback_invoke,
         answered=_writeback_answered,
         managed_refusal=(ImportError,),
-        detail="append an effectiveness evidence node to Rgc7",
+        detail="append an effectiveness evidence node to obligations-control-mapping",
     ),
     "timeseries": PortCase(
         invoke=_timeseries_invoke,
@@ -237,7 +237,7 @@ CANONICAL_CALLS: dict[str, PortCase] = {
     "evaluation": PortCase(
         invoke=_evaluation_invoke,
         answered=_evaluation_answered,
-        # The managed gate reaches Hrz4 over HTTP, which is unreachable offline.
+        # The managed gate reaches model-quality-gate over HTTP, which is unreachable offline.
         managed_refusal=(Exception,),
         detail="score one golden dataset through the promotion authority",
     ),

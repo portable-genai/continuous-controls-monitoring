@@ -1,4 +1,4 @@
-# SPEC: Continuous Controls Monitoring (Aud2)
+# SPEC: Continuous Controls Monitoring (`continuous-controls-monitoring`)
 
 Locked decisions, pinned stack, contracts. This document is the deepest authority on intent.
 
@@ -17,13 +17,13 @@ Locked decisions, pinned stack, contracts. This document is the deepest authorit
 ## Contracts
 - **Identity**: a request's actor is a server-verified `Principal`; the client-supplied actor is
   discarded. Local profile resolves a seeded dev persona from `X-Dev-Persona`.
-- **Domain**: continuous controls monitoring. The system READS the control inventory from Rgc7
+- **Domain**: continuous controls monitoring. The system READS the control inventory from `obligations-control-mapping`
   (the single system of record; this repo keeps no parallel control catalog), gathers evidence
-  from a scanner (Cloud Asset Inventory / Security Command Center) and from Rsk1's cloud control
+  from a scanner (Cloud Asset Inventory / Security Command Center) and from `compliance-advisory`'s cloud control
   evidence packs, and grades each control against a config-owned test pack. The `ControlTestEngine`
   is pure stdlib: it scores design and operating effectiveness with an explicit `as_of`, and a
   control fails when any finding reaches the pack's gate severity. Results are written back to
-  Rgc7 as evidence nodes attached to the tested control and exported to a BigQuery time-series.
+  `obligations-control-mapping` as evidence nodes attached to the tested control and exported to a BigQuery time-series.
 - **Redaction before audit**: the monitoring service redacts PII (via `pii-kit`) before writing
   any audit record. No raw identifier reaches the WORM store.
 - **Determinism**: the effectiveness verdict (design and operating ratings, pass/fail, findings)
@@ -31,7 +31,7 @@ Locked decisions, pinned stack, contracts. This document is the deepest authorit
   verdict, and its narration is schema-validated and discarded unless every figure it states is
   one the engine produced (groundedness).
 - **Maker-checker (P-06) and routing (R8)**: a HIGH/CRITICAL result sets
-  `requires_human_review=True` AND is routed through `ReviewRouterPort` to the Hrz7 console in the
+  `requires_human_review=True` AND is routed through `ReviewRouterPort` to the `human-review-console` in the
   same request. The flag alone is not the escalation. The response carries `review_ref`, so a
   caller can tell a routed escalation from one that stopped here. The managed adapter refuses to
   run with no console configured rather than swallowing the escalation.
@@ -74,7 +74,7 @@ Locked decisions, pinned stack, contracts. This document is the deepest authorit
   resolved server-side and the resolved headers are attached afterwards. The service credential
   is read from the server environment only. Framing and CORS are allowlists that refuse a
   wildcard however it is written, and an empty allowlist denies rather than opening up.
-- **Eval**: `--mode smoke` is the offline pre-merge check; `--mode gate` is the Hrz4 promotion
+- **Eval**: `--mode smoke` is the offline pre-merge check; `--mode gate` is the `model-quality-gate` promotion
   authority. The gate fails closed.
 - **Tests**: split into `unit`, `contract` and `integration`. The offline gate runs the first
   two; every integration module is marked, and that marking is itself enforced.

@@ -1,4 +1,5 @@
-"""Local ControlInventoryPort: the offline copy of a read of Rgc7's control inventory.
+"""Local ControlInventoryPort: the offline copy of a read of obligations-control-mapping's control
+inventory.
 
 Serves the shared synthetic estate in ``_fixtures.py``. Cross-tenant reads are refused the same
 way the managed adapter must refuse them: a control that exists under another tenant raises

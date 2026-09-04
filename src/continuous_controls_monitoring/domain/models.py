@@ -5,11 +5,12 @@ The artifacts THIS vertical produces, as opposed to the vertical-neutral machine
 rendered line whose length depends on ``friendly_name`` fails the repo's own format check for
 no reason but the length of its name.
 
-The heart of Aud2: a control READ from the Rgc7 inventory (this repo keeps no parallel
-catalog), a test PACK that says how that control is tested, the EVIDENCE a scanner or an
-Rsk1 evidence pack produces, the FINDINGS the deterministic engine emits, and the per-control
-RESULT that scores design and operating effectiveness. Every consequential figure on these
-types is produced by pure stdlib code in ``testing.py``; a model only narrates them.
+The heart of continuous-controls-monitoring: a control READ from the obligations-control-mapping
+inventory (this repo keeps no parallel catalog), a test PACK that says how that control is tested,
+the EVIDENCE a scanner or an compliance-advisory evidence pack produces, the FINDINGS the
+deterministic engine emits, and the per-control RESULT that scores design and operating
+effectiveness. Every consequential figure on these types is produced by pure stdlib code in
+``testing.py``; a model only narrates them.
 
 A fork building a different vertical rewrites this module and keeps ``kernel.py`` untouched.
 """
@@ -51,7 +52,9 @@ class EffectivenessRating(LenientStrEnum):
 class FindingKind(LenientStrEnum):
     """The kinds of control-test exception the deterministic engine detects."""
 
-    CONTROL_NOT_IN_INVENTORY = "control_not_in_inventory"  # design: not in Rgc7 SoR
+    CONTROL_NOT_IN_INVENTORY = (
+        "control_not_in_inventory"  # design: not in obligations-control-mapping SoR
+    )
     DESIGN_INCOMPLETE = "design_incomplete"  # design: pack under-specified
     NO_EVIDENCE = "no_evidence"  # operating: nothing to test (escalates)
     CONFIG_DRIFT = "config_drift"  # operating: an attribute drifted from expected
@@ -62,7 +65,7 @@ class FindingKind(LenientStrEnum):
 
 @dataclass(frozen=True, slots=True)
 class InventoryControl:
-    """One control READ from the Rgc7 inventory (the system of record).
+    """One control READ from the obligations-control-mapping inventory (the system of record).
 
     This repo never mints a control id; every id it names originated from a read. ``owner`` is
     who an exception routes to; ``sox_significant`` carries the ICFR documentation scope the
@@ -158,7 +161,8 @@ class ControlTestResult:
     """The per-control result: design and operating effectiveness, findings, and the verdict.
 
     ``requires_human_review`` is set for every FAIL (an exception), which routes to the control
-    owner via Hrz7 and never auto-closes. ``as_of`` makes the result replayable: the engine
+    owner via human-review-console and never auto-closes. ``as_of`` makes the result replayable: the
+    engine
     reads no clock.
     """
 
@@ -195,7 +199,8 @@ class MonitoredControl:
     """One control's result plus what the pipeline did with it: routed, written back, narrated.
 
     The engine produces ``result``; the service records where the escalation WENT (``review_ref``,
-    rule R8), where the effectiveness evidence landed in Rgc7 (``writeback_ref``), and the
+    rule R8), where the effectiveness evidence landed in obligations-control-mapping
+    (``writeback_ref``), and the
     validated exception narration (empty when the control passed or the narration was discarded).
     """
 

@@ -1,6 +1,6 @@
 # Adopting this repo as your base
 
-This repository (Aud2, Continuous Controls Monitoring) is a **common base** that a bank or other
+This repository (`continuous-controls-monitoring`, Continuous Controls Monitoring) is a **common base** that a bank or other
 regulated institution forks to build its own **always-on control-testing service**: it gathers
 live evidence for each key control, grades design and operating effectiveness deterministically,
 narrates an auditor-ready exception write-up, routes the consequential ones to a human, and writes
@@ -36,7 +36,7 @@ vertical's artifacts.
 | **Vertical (the artifacts)** | `domain/models.py` (`ControlTestPack`, `ControlTestResult`, `ControlFinding`, `Dimension`, `EffectivenessRating`, `EvidenceRecord`, `InventoryControl`), `domain/narration.py`, `domain/monitoring_service.py`, the fixtures and the eval golden set | rewrite for your control taxonomy |
 
 If your product is another *evidence in, verdict out* testing engine, the hexagon, the three
-profiles, the packs-as-data mechanism, the eval gate and the Hrz7 review routing transfer
+profiles, the packs-as-data mechanism, the eval gate and the `human-review-console` review routing transfer
 directly; you replace the pack definitions and the evidence sources.
 
 ## 2. Core-vs-adopter-owned files (so upstream merges stay mechanical)
@@ -80,7 +80,7 @@ make gate
 `--dist` defaults to the `--resource` value; pass it explicitly when your git id differs from your
 resource stem. `--resource` is validated against the same regex the Terraform `name_prefix`
 variable enforces, so a stem the stack would refuse fails here instead of at plan time. Add
-`--include-docs` to sweep Markdown prose too. The catalog id `Aud2` is left alone unless you pass
+`--include-docs` to sweep Markdown prose too. The catalog id `continuous-controls-monitoring` is left alone unless you pass
 `--catalog-id`, so a fork stays traceable to the entry it descends from. The script deliberately
 does NOT touch the human decisions below.
 
@@ -108,7 +108,7 @@ does NOT touch the human decisions below.
    of a problem is not evidence of its absence, and an always-on test that graded a silent control
    green would be worse than no test.
 5. **The evidence sources.** `EvidenceScannerPort` gathers live configuration, access and
-   transaction evidence, and `ControlEvidencePort` reads Rsk1's cloud control-evidence packs.
+   transaction evidence, and `ControlEvidencePort` reads `compliance-advisory`'s cloud control-evidence packs.
    Wiring those to your real estate is yours, and it is where the residency and least-privilege
    questions actually bite.
 6. **Reference data is fictional.** Every fixture and the seeded evidence use obviously fake
@@ -129,21 +129,21 @@ This repo is one system in a catalog of composable GRC systems, and its boundari
 sharp because it both reads from and writes back to a sibling (see
 [`faq/features-faq.md`](faq/features-faq.md) for the full map):
 
-- **Rgc7** obligations and control mapping owns the control inventory. `ControlInventoryPort`
+- `obligations-control-mapping` and control mapping owns the control inventory. `ControlInventoryPort`
   READS it, and this repo keeps no parallel catalog. `EffectivenessWritebackPort` WRITES results
-  back to Rgc7 as evidence nodes, so a coverage figure there reflects what was actually tested.
-- **Rsk1** compliance assistant owns the cloud control-evidence packs (the former Rsk2 module),
+  back to `obligations-control-mapping` as evidence nodes, so a coverage figure there reflects what was actually tested.
+- `compliance-advisory` owns the cloud control-evidence packs (the former the cloud control-mapping toolkit module),
   read through `ControlEvidencePort`.
-- **Hrz7** human-review / maker-checker console: every `requires_human_review` exception is routed
+- `human-review-console` human-review / maker-checker console: every `requires_human_review` exception is routed
   to it over the shared `review-kit` (rule R8); you wire your endpoint
   (`HUMAN_REVIEW_URL`), you do not re-implement the console.
-- **Hrz5** observability plus immutable WORM audit: audit events and trace spans go to it.
-- **Hrz4** AI-quality / model-risk gate: owns promotion. `eval/run_eval.py --mode gate` is the
+- `agent-observability` plus immutable WORM audit: audit events and trace spans go to it.
+- `model-quality-gate` AI-quality / model-risk gate: owns promotion. `eval/run_eval.py --mode gate` is the
   client half and refuses to run off the managed profile.
-- **Hrz3** agent registry: this agent publishes its A2A card at
+- `agent-registry`: this agent publishes its A2A card at
   `/.well-known/agent-card.json`; register it rather than inventing a discovery mechanism.
 
-The guardrail gateway (Hrz1) is **not** integrated today. It becomes mandatory the moment
+The guardrail gateway (`agent-guardrail-gateway`) is **not** integrated today. It becomes mandatory the moment
 untrusted free text (an evidence record's operator note, say) reaches the narrator: see rule R1 in
 [`../COMPLIANCE.md`](../COMPLIANCE.md).
 
@@ -157,11 +157,11 @@ untrusted free text (an evidence record's operator note, say) reaches the narrat
 - [ ] Kept the gate-severity rule and the no-evidence-is-DEFICIENT rule.
 - [ ] Wired `EvidenceScannerPort` and `ControlEvidencePort` to your real estate, with the
       least-privilege credentials that implies.
-- [ ] Pointed `ControlInventoryPort` at Rgc7 and wired the effectiveness write-back.
+- [ ] Pointed `ControlInventoryPort` at `obligations-control-mapping` and wired the effectiveness write-back.
 - [ ] Replaced every synthetic fixture.
 - [ ] Rebuilt the eval golden set for your packs.
 - [ ] Reviewed the deploy posture (Dockerfile, Terraform, `retention_days`, bind address).
-- [ ] Wired your Hrz7 review endpoint and decided which sibling services you integrate vs stub.
+- [ ] Wired your `human-review-console` review endpoint and decided which sibling services you integrate vs stub.
 - [ ] Read [`model-card.md`](model-card.md) and closed its remaining controls before enabling the
       managed narrator.
 - [ ] Recorded your baseline upstream tag so you can take future fixes.
