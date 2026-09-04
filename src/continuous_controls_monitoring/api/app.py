@@ -1,4 +1,4 @@
-"""FastAPI application for Continuous Controls Monitoring (Aud2).
+"""FastAPI application for Continuous Controls Monitoring (continuous-controls-monitoring).
 
 Import-safe (the Container is built at request time, never at import; only ``Settings`` is read
 at import, to learn which identity adapter is bound, and no adapter is constructed), identity is
@@ -308,7 +308,7 @@ def test_control(
     """Run one control's test now, by pack id; the actor is the verified principal.
 
     The consequential verdict (design and operating effectiveness) is computed by the pure
-    engine, never a model. Rule R8: a FAIL is ROUTED to the Hrz7 console from inside the
+    engine, never a model. Rule R8: a FAIL is ROUTED to the human-review-console from inside the
     service, in the same request that produced it.
     """
     container = _container()

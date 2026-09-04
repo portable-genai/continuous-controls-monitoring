@@ -413,7 +413,8 @@ _REBOUND_SETTINGS = "\n".join(
             for p in ("local", "gcp")
         ],
         f"    onprem: {_PKG}.adapters.onprem.evaluation:OnPremEvalAdapter",
-        # The data ports Aud2 adds are also rebound to their SDK-free adapters under gcp, so the
+        # The data ports continuous-controls-monitoring adds are also rebound to their SDK-free
+        # adapters under gcp, so the
         # artifact route runs offline while the real IAP identity adapter is exercised.
         "  control_inventory:",
         *[

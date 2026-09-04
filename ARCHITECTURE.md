@@ -1,4 +1,4 @@
-# ARCHITECTURE: Continuous Controls Monitoring (Aud2)
+# ARCHITECTURE: Continuous Controls Monitoring (`continuous-controls-monitoring`)
 
 Hexagonal ports-and-adapters. A pure-stdlib domain core speaks only to ports (`typing.Protocol`s);
 adapter families implement them; one env var (`CCM_PROFILE`) swaps the
@@ -49,7 +49,7 @@ startup and Terraform serving authorization until its live integration test exis
   HTTP and asserts every step, which is what lets the presenter tool double as the unattended
   self-test. `portability_demo.py` and `check_docs_links.py` are standalone checks. Nothing here
   is imported by `src/`, and `.dockerignore` keeps all of it out of the serving image.
-- `ui/` : REMOVED. Aud2 has no user-facing panel slice in its build plan, so `make drop-ui`
+- `ui/` : REMOVED. `continuous-controls-monitoring` has no user-facing panel slice in its build plan, so `make drop-ui`
   removed the micro-frontend, its npm dependabot ecosystem and its CI job together. An embeddable
   effectiveness dashboard is a recorded remaining gap, not a shipped surface.
 
@@ -61,11 +61,11 @@ data only). `contract/canonical.py` holds ONE canonical request per port, so the
 behavioural suites cannot quietly assert different things.
 
 ## Request pipeline (`MonitoringService.evaluate_pack`, then the caller)
-read the control from Rgc7 (never a parallel catalog) -> gather evidence (scanner + Rsk1 packs)
+read the control from `obligations-control-mapping` (never a parallel catalog) -> gather evidence (scanner + `compliance-advisory` packs)
 -> deterministic `ControlTestEngine` scores design and operating effectiveness with an explicit
 `as_of` -> redact-before-audit (P-04) already-redacted WORM write -> write the result back to
-Rgc7 as an evidence node and export the time-series row -> narrate an exception (schema-validated,
-discarded unless grounded) -> **route every exception to the control owner via Hrz7 (R8)**. The
+`obligations-control-mapping` as an evidence node and export the time-series row -> narrate an exception (schema-validated,
+discarded unless grounded) -> **route every exception to the control owner via `human-review-console` (R8)**. The
 audit actor and the review maker are both the verified `Principal`, never the request body.
 Routing happens in the same call that produced the result, on the API, CLI and agent surfaces
 alike, so an exception never depends on a later job that may not exist. A control fails when any
@@ -77,11 +77,11 @@ silent pass.
 |---|---|---|---|
 | `AuditSinkPort` | hash-chained SQLite WORM (commons) | Cloud Logging WORM (lazy) | placeholder |
 | `IdentityPort` | seeded personas (commons) | IAP assertion (lazy) | placeholder |
-| `ReviewRouterPort` | review-kit outbox (offline, inspectable) | Hrz7 service intake over S2S | placeholder |
-| `ControlInventoryPort` | fixture estate (tenant-scoped) | Rgc7 read API over S2S (lazy) | placeholder |
+| `ReviewRouterPort` | review-kit outbox (offline, inspectable) | `human-review-console` service intake over S2S | placeholder |
+| `ControlInventoryPort` | fixture estate (tenant-scoped) | `obligations-control-mapping` read API over S2S (lazy) | placeholder |
 | `EvidenceScannerPort` | fixture snapshots | Cloud Asset Inventory + SCC (lazy) | placeholder |
-| `ControlEvidencePort` | canned Rsk1 packs | Rsk1 evidence surface over S2S (lazy) | placeholder |
-| `EffectivenessWritebackPort` | in-memory Rgc7 graph (inspectable) | Rgc7 write-back over S2S (lazy) | placeholder |
+| `ControlEvidencePort` | canned `compliance-advisory` packs | `compliance-advisory` evidence surface over S2S (lazy) | placeholder |
+| `EffectivenessWritebackPort` | in-memory `obligations-control-mapping` graph (inspectable) | `obligations-control-mapping` write-back over S2S (lazy) | placeholder |
 | `TimeSeriesExportPort` | in-memory rows (inspectable) | BigQuery (lazy) | placeholder |
 | `GenerationPort` | deterministic grounded narrator | Gemini (lazy) | placeholder |
 

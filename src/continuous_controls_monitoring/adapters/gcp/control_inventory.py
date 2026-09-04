@@ -1,10 +1,11 @@
-"""Managed ControlInventoryPort: READ Rgc7's control inventory over its authenticated read API.
+"""Managed ControlInventoryPort: READ obligations-control-mapping's control inventory over its
+authenticated read API.
 
-The S2S credential is a Google-signed OIDC ID token addressed to Rgc7's IAP audience, so the
-lazy ``google.auth`` import is the first thing each method does and an offline caller gets an
-ImportError there rather than at construction. The HTTP itself is stdlib ``urllib``, so no extra
-runtime dependency is pulled in. Cross-tenant reads are refused with a 403, never a 404, by
-propagating Rgc7's own status.
+The S2S credential is a Google-signed OIDC ID token addressed to obligations-control-mapping's IAP
+audience, so the lazy ``google.auth`` import is the first thing each method does and an offline
+caller gets an ImportError there rather than at construction. The HTTP itself is stdlib ``urllib``,
+so no extra runtime dependency is pulled in. Cross-tenant reads are refused with a 403, never a 404,
+by propagating obligations-control-mapping's own status.
 """
 
 from __future__ import annotations
@@ -22,7 +23,9 @@ from ...ports.control_inventory import CrossTenantError
 
 
 class RemoteControlInventory:
-    """Read the Rgc7 inventory over its REST read API under the managed profile."""
+    """Read the obligations-control-mapping inventory over its REST read API under the managed
+    profile.
+    """
 
     def __init__(self, settings: Settings) -> None:
         self._settings = settings
@@ -63,7 +66,9 @@ class RemoteControlInventory:
         try:
             with urllib.request.urlopen(req, timeout=10) as resp:  # noqa: S310 - fixed https base
                 return resp.status, json.loads(resp.read().decode("utf-8"))
-        except urllib.error.HTTPError as exc:  # pragma: no cover - needs live Rgc7
+        except (
+            urllib.error.HTTPError
+        ) as exc:  # pragma: no cover - needs live obligations-control-mapping
             return exc.code, {}
 
 
@@ -74,5 +79,9 @@ def _control_from_json(item: Any) -> InventoryControl:
         owner=str(item.get("owner", "")),
         framework=str(item.get("framework", "")),
         sox_significant=bool(item.get("sox_significant", False)),
-        citations=(Citation(source_id=f"rgc7:{item.get('control_id', '')}", title="Rgc7"),),
+        citations=(
+            Citation(
+                source_id=f"rgc7:{item.get('control_id', '')}", title="obligations-control-mapping"
+            ),
+        ),
     )

@@ -1,4 +1,6 @@
-"""On-prem ControlInventoryPort: fail-fast placeholder (bind the client's own Rgc7 read API)."""
+"""On-prem ControlInventoryPort: fail-fast placeholder (bind the client's own
+obligations-control-mapping read API).
+"""
 
 from __future__ import annotations
 
@@ -14,12 +16,14 @@ class OnPremControlInventory:
 
     def list_controls(self, tenant: str) -> tuple[InventoryControl, ...]:
         raise NotImplementedError(
-            "on-prem control inventory is a portability placeholder: bind the client's own Rgc7 "
+            "on-prem control inventory is a portability placeholder: bind the client's own "
+            "obligations-control-mapping "
             "read API (see docs/onprem-migration.md)"
         )
 
     def get_control(self, control_id: str, *, tenant: str) -> InventoryControl | None:
         raise NotImplementedError(
-            "on-prem control inventory is a portability placeholder: bind the client's own Rgc7 "
+            "on-prem control inventory is a portability placeholder: bind the client's own "
+            "obligations-control-mapping "
             "read API (see docs/onprem-migration.md)"
         )

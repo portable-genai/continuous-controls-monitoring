@@ -11,7 +11,7 @@ also the console script), the `CCM_` env prefix (including the bare token that
 `infra/terraform/render.tf.json` carries, so Terraform sets the same variable names on the
 service), the Terraform `name_prefix` resource stem (`aud2-svc`) and the distribution / git id in
 one pass. Preview with `--dry-run`, apply with `--yes`, then recreate the venv, `make install`,
-and run `make gate`. The catalog id `Aud2` is left alone unless you pass `--catalog-id`, so a fork
+and run `make gate`. The catalog id `continuous-controls-monitoring` is left alone unless you pass `--catalog-id`, so a fork
 stays traceable to the entry it descends from. The script does the mechanical rename; the human
 decisions (region, IdP, your packs, the evidence sources, the eval golden set) are the checklist
 in `ADOPTING.md`.
@@ -46,9 +46,9 @@ Four things, and none of them is code here:
 2. **The evidence sources.** `EvidenceScannerPort` needs credentials to read live configuration,
    access and transaction evidence in your estate. This is the widest privilege in the system and
    it is yours to scope.
-3. **The Rgc7 endpoints.** A control inventory to read, and somewhere to write effectiveness
+3. **The `obligations-control-mapping` endpoints.** A control inventory to read, and somewhere to write effectiveness
    results back as evidence nodes. This repo keeps no parallel catalog by design.
-4. **The review console.** An Hrz7 deployment reachable at `HUMAN_REVIEW_URL`. The managed
+4. **The review console.** An `human-review-console` deployment reachable at `HUMAN_REVIEW_URL`. The managed
    router REFUSES to swallow an escalation when this is empty, so a fork cannot ship rule R8
    unwired and green.
 
@@ -66,7 +66,7 @@ FIVE places or it runs with no enforcement at all: `ports/__init__.py` (`PORT_PR
 Because this is a control plane, not a screen. `make drop-ui` has been run, which is the one step
 that removes `ui/` together with its npm dependabot ecosystem and its CI job consistently;
 deleting the directory by hand would leave a dependabot ecosystem pointing at nothing and a CI job
-with no work. Exceptions are reviewed in the Hrz7 console, which is where a reviewer already
+with no work. Exceptions are reviewed in the `human-review-console`, which is where a reviewer already
 works. If your fork needs its own screen, add it deliberately rather than reviving the template's.
 
 ### Does the gate run for my fork out of the box?
@@ -96,8 +96,8 @@ the step keys and the `facts` dict the checks read.
 ### What is still open?
 
 [`../practices-audit.md`](../practices-audit.md) carries the per-check verdict and the work list.
-The two that matter most before production: binding the Hrz1 guardrail gateway, which matters more
+The two that matter most before production: binding the `agent-guardrail-gateway`, which matters more
 here than in most repos because evidence records can carry operator-written text that reaches the
-narrator, and registering this repo's metric bundle with Hrz4 so `eval/run_eval.py --mode gate`
+narrator, and registering this repo's metric bundle with `model-quality-gate` so `eval/run_eval.py --mode gate`
 has an authority to ask. The Terraform stack is written, validated and tested against a mocked
 provider; it has never been applied.

@@ -56,10 +56,12 @@ class ControlTestResponse(BaseModel):
     evidence_count: int
     findings: list[FindingModel] = []
     citations: list[CitationModel] = []
-    #: Where the escalation WENT (rule R8): the Hrz7 review id, or the local queue reference.
+    #: Where the escalation WENT (rule R8): the human-review-console review id, or the local queue
+    #: reference.
     #: Empty only when the control passed.
     review_ref: str = ""
-    #: Where the effectiveness evidence landed in Rgc7's graph, attached to the control.
+    #: Where the effectiveness evidence landed in obligations-control-mapping's graph, attached to
+    #: the control.
     writeback_ref: str = ""
     #: The validated exception narration (empty when the control passed or narration failed).
     narration_headline: str = ""

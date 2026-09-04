@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Evaluation gate for Continuous Controls Monitoring (Aud2).
+"""Evaluation gate for Continuous Controls Monitoring (continuous-controls-monitoring).
 
 Two named layers via ``--mode`` (the scaffold is ``agent_eval_kit.eval_main``):
 
 * **smoke** (default) - the offline pre-merge check CI runs on every change: it drives the pure
-  ``ControlTestEngine`` against a golden set with SDK-free code and scores four metrics.
-* **gate** - the promotion verdict from the shared Hrz4 authority (requires the ``gcp``
+  ``ControlTestEngine`` against a golden set with SDK-free code and scores four metrics. * **gate**
+  - the promotion verdict from the shared model-quality-gate authority (requires the ``gcp``
   profile), via ``agent_eval_kit.PromotionGateClient``.
 
 The metrics score against the dataset's OWN ``expected_*`` labels, an independent oracle, NEVER
@@ -57,7 +57,8 @@ THRESHOLDS: dict[str, float] = {
     "pii_safety": 0.99,
     "pack_schema_validity": 1.0,
 }
-#: The registered Hrz4 metric bundle for this vertical (Hrz4 owns the metrics + thresholds).
+#: The registered model-quality-gate metric bundle for this vertical (model-quality-gate owns the
+#: metrics + thresholds).
 _BUNDLE = "continuous-controls-monitoring"
 
 _AS_OF = date(2026, 8, 1)
@@ -129,7 +130,9 @@ def _evidence_from_case(case: dict[str, object]) -> tuple[EvidenceRecord, ...]:
 
 
 def _control_for(case: dict[str, object]) -> InventoryControl | None:
-    """The Rgc7 control the case says exists, or ``None`` for the not-in-inventory case."""
+    """The obligations-control-mapping control the case says exists, or ``None`` for the
+    not-in-inventory case.
+    """
     if not case.get("in_inventory", True):
         return None
     return InventoryControl(
@@ -168,7 +171,9 @@ class _CaseScanner:
 
 
 class _NoControlEvidence:
-    """The Rsk1 evidence port, empty: a golden case carries all of its own evidence."""
+    """The compliance-advisory evidence port, empty: a golden case carries
+    all of its own evidence.
+    """
 
     def fetch(self, control_id: str) -> tuple[EvidenceRecord, ...]:
         return ()
@@ -261,7 +266,7 @@ def audit_texts(rows: Iterable[Mapping[str, Any]]) -> list[str]:
 
 
 def review_texts(entries: Iterable[Any]) -> list[str]:
-    """Every content-bearing field of every payload queued for the shared Hrz7 console.
+    """Every content-bearing field of every payload queued for the shared human-review-console.
 
     The console is the other place a control test publishes to, and it is a SHARED sink. ``maker``
     is excluded for exactly the reason ``actor`` is in :func:`audit_texts`.
@@ -308,7 +313,8 @@ def run_smoke(dataset: Path) -> EvalReport:
     # pii_safety: no raw identifier may survive into anything the service published. The scan
     # covers the three sinks a control test writes to, because covering only one is how the
     # previous version stayed green: the WORM record, the model prompt (assembled from finding
-    # prose, which the engine cuts from the evidence record) and the Hrz7 review payload.
+    # prose, which the engine cuts from the evidence record) and the human-review-console review
+    # payload.
     records = [
         *audit_texts(container.audit.log.read_all()),  # type: ignore[attr-defined]
         *narrator.prompts,
@@ -357,6 +363,6 @@ if __name__ == "__main__":
             smoke=run_smoke,
             gate=run_gate,
             default_dataset=DEFAULT_DATASET,
-            description="Offline / Hrz4 evaluation gate for Aud2.",
+            description="Offline / model-quality-gate for continuous-controls-monitoring.",
         )
     )

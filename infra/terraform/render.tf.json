@@ -3,6 +3,6 @@
     "render_region": "asia-southeast1",
     "render_package_name": "continuous_controls_monitoring",
     "render_env_prefix": "CCM",
-    "render_catalog_id": "Aud2"
+    "render_repository": "continuous-controls-monitoring"
   }
 }

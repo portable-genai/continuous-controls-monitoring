@@ -1,10 +1,11 @@
 """The deterministic control-test engine: evidence in, effectiveness out. PURE stdlib.
 
-Cribbed from Rsk3's residency module (the closest built thing to continuous control testing):
-a per-kind detector emits :class:`ControlFinding` objects, a :func:`compute_verdict` turns them
-into a PASS/FAIL against the pack's gate severity, and each dimension is scored separately. No
-LLM, no network, no clock: the engine takes an explicit ``as_of`` and the same inputs always
-grade the same way, which is what makes an always-on control test trustworthy.
+Cribbed from architecture-validator's residency module (the closest built thing to continuous
+control testing): a per-kind detector emits :class:`ControlFinding` objects, a
+:func:`compute_verdict` turns them into a PASS/FAIL against the pack's gate severity, and each
+dimension is scored separately. No LLM, no network, no clock: the engine takes an explicit ``as_of``
+and the same inputs always grade the same way, which is what makes an always-on control test
+trustworthy.
 
 The rule the whole thing rests on: **a control fails when any finding reaches the gate
 severity**, and a dimension with no evidence to test is DEFICIENT, never quietly EFFECTIVE.
@@ -127,7 +128,8 @@ class ControlTestEngine:
                     "control-not-in-inventory",
                     (
                         f"{pack.control_id} is tested by pack {pack.pack_id} but is not present "
-                        "in the Rgc7 control inventory (the system of record); a test with no "
+                        "in the obligations-control-mapping control inventory (the system of "
+                        "record); a test with no "
                         "control of record cannot evidence design."
                     ),
                     pack.control_id,

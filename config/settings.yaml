@@ -1,4 +1,4 @@
-# Continuous Controls Monitoring (Aud2) runtime configuration.
+# Continuous Controls Monitoring (continuous-controls-monitoring) runtime configuration.
 #
 # Loaded by `src/continuous_controls_monitoring/config.py`. Point at a different file with
 # CCM_SETTINGS; a path that is named but missing is a boot error, not
@@ -45,14 +45,14 @@ iap_audience: ${CCM_IAP_AUDIENCE:-}
 # deliberately distinct from this service's own inbound CCM_S2S_TOKEN.
 review_url: ${HUMAN_REVIEW_URL:-}
 
-# Rgc7 is the SINGLE SYSTEM OF RECORD for the control inventory: Aud2 READS it and WRITES
+# obligations-control-mapping is the SINGLE SYSTEM OF RECORD for the control inventory: continuous-controls-monitoring READS it and WRITES
 # effectiveness results back, and keeps no parallel catalog. These are the managed (gcp) adapter
 # endpoints; the offline profile serves a deterministic fixture estate instead. Three-state:
 # unset or emptied leaves the managed adapter with no endpoint (it refuses).
 rgc7_read_url: ${CCM_RGC7_READ_URL:-}
 rgc7_writeback_url: ${CCM_RGC7_WRITEBACK_URL:-}
 
-# Rsk1's cloud control evidence-pack surface (the ex-Rsk2 module): one more evidence kind beside
+# compliance-advisory's cloud control evidence-pack surface (the formerly the cloud control-mapping toolkit module): one more evidence kind beside
 # the scanners, read by the managed control-evidence adapter.
 rsk1_evidence_url: ${CCM_RSK1_EVIDENCE_URL:-}
 
@@ -97,7 +97,7 @@ adapters:
     onprem: continuous_controls_monitoring.adapters.onprem.review_router:OnPremReviewRouter
 
   # Tracing. Which BACKEND a deployed profile exports to is not a binding: the gcp
-  # adapter reads OTEL_EXPORTER_OTLP_ENDPOINT and sends OTLP to the Hrz5 collector when it
+  # adapter reads OTEL_EXPORTER_OTLP_ENDPOINT and sends OTLP to the agent-observability collector when it
   # is set, straight to Cloud Trace when it is not. Tracing is not essential to
   # correctness, so onprem is ABSENT rather than fatal, unlike the other placeholders.
   tracer:
@@ -105,7 +105,7 @@ adapters:
     gcp: continuous_controls_monitoring.adapters.gcp.tracer:CloudTracerAdapter
     onprem: continuous_controls_monitoring.adapters.onprem.tracer:OnPremTracerAdapter
 
-  # The promotion authority (Hrz4). The local adapter scores offline but REFUSES to
+  # The promotion authority (model-quality-gate). The local adapter scores offline but REFUSES to
   # promote: a promotion certified by a laptop with no quality service is certified by
   # nothing.
   evaluation:

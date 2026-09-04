@@ -1,4 +1,4 @@
-"""Continuous Controls Monitoring (Aud2).
+"""Continuous Controls Monitoring (continuous-controls-monitoring).
 
 Continuously tests key controls, scores effectiveness, and narrates auditor-ready exceptions.
 

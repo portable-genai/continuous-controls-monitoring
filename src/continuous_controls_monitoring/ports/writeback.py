@@ -1,9 +1,11 @@
-"""EffectivenessWritebackPort: WRITE Aud2 results back to Rgc7 as evidence nodes.
+"""EffectivenessWritebackPort: WRITE continuous-controls-monitoring results back to
+obligations-control-mapping as evidence nodes.
 
-The write-back side of the control-triad boundary. A result is appended to Rgc7's graph as an
-evidence node LINKED to the tested control; it never mutates control-catalog membership. A
-write-back naming a control id Rgc7 does not know is REJECTED (:class:`UnknownControlError`),
-never silently created, so Aud2 cannot invent a control by writing to it.
+The write-back side of the control-triad boundary. A result is appended to
+obligations-control-mapping's graph as an evidence node LINKED to the tested control; it never
+mutates control-catalog membership. A write-back naming a control id obligations-control-mapping
+does not know is REJECTED (:class:`UnknownControlError`), never silently created, so
+continuous-controls-monitoring cannot invent a control by writing to it.
 """
 
 from __future__ import annotations

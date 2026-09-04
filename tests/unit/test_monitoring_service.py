@@ -1,9 +1,10 @@
-"""The orchestration: write-back integrity, the Rsk1 dependency, cross-tenant denial, no catalog.
+"""The orchestration: write-back integrity, the compliance-advisory dependency, cross-tenant denial,
+no catalog.
 
 These are the slice proofs that are about the pipeline rather than the pure engine: a result is
-written back to Rgc7 and is readable there attached to its control; removing the Rsk1 evidence
-source flips a dependent control from pass to fail; a cross-tenant read is refused with a 403;
-and this repo registers no control-catalog store of its own.
+written back to obligations-control-mapping and is readable there attached to its control; removing
+the compliance-advisory evidence source flips a dependent control from pass to fail; a cross-tenant
+read is refused with a 403; and this repo registers no control-catalog store of its own.
 """
 
 from __future__ import annotations
@@ -45,7 +46,9 @@ def test_a_written_result_is_readable_from_rgc7_attached_to_the_control() -> Non
 
 
 def test_removing_the_rsk1_evidence_source_flips_a_dependent_control_pass_to_fail() -> None:
-    """AC-2 recert evidence comes only from Rsk1; without it the control cannot be evidenced."""
+    """AC-2 recert evidence comes only from compliance-advisory; without it the control cannot be
+    evidenced.
+    """
     service, container = _service_and_container()
     pack = next(p for p in service.packs if p.pack_id == "pack-access-recert")
 
@@ -54,7 +57,8 @@ def test_removing_the_rsk1_evidence_source_flips_a_dependent_control_pass_to_fai
     )
     assert with_rsk1.result.passed is True
 
-    # Swap the Rsk1 evidence port for one that returns nothing: the control now fails.
+    # Swap the compliance-advisory evidence port for one that returns nothing: the control now
+    # fails.
     class _EmptyEvidence:
         def fetch(self, control_id: str) -> tuple[EvidenceRecord, ...]:
             return ()
@@ -64,7 +68,9 @@ def test_removing_the_rsk1_evidence_source_flips_a_dependent_control_pass_to_fai
     without_rsk1 = starved.evaluate_pack(
         pack, as_of=_AS_OF, tenant=sample_cases.TENANT, actor=sample_cases.ACTOR
     )
-    assert without_rsk1.result.passed is False, "removing the Rsk1 source must flip pass to fail"
+    assert without_rsk1.result.passed is False, (
+        "removing the compliance-advisory source must flip pass to fail"
+    )
 
 
 def test_a_cross_tenant_read_is_refused_with_403_not_404() -> None:
@@ -77,7 +83,8 @@ def test_a_cross_tenant_read_is_refused_with_403_not_404() -> None:
 
 
 def test_this_repo_registers_no_control_catalog_store_port() -> None:
-    """The control-triad boundary: Aud2 reads the inventory and writes results, it owns no catalog.
+    """The control-triad boundary: continuous-controls-monitoring reads the inventory and writes
+    results, it owns no catalog.
 
     Enforced structurally: the only inventory-facing ports are a READ port and a WRITE-BACK
     port. A control-catalog STORE port (one that would let this repo mint or own control
@@ -88,12 +95,15 @@ def test_this_repo_registers_no_control_catalog_store_port() -> None:
     assert "writeback" in ports, "the write-back port must exist"
     forbidden = {"control_catalog", "control_store", "inventory_store", "catalog_store"}
     assert not (ports & forbidden), (
-        "Aud2 must not register a control-catalog store: Rgc7 is the single system of record"
+        "continuous-controls-monitoring must not register a control-catalog store: "
+        "obligations-control-mapping is the single system of record"
     )
 
 
 def test_a_write_back_for_an_unknown_control_is_rejected() -> None:
-    """Aud2 cannot mint a control by writing an evidence node to an id the inventory lacks."""
+    """continuous-controls-monitoring cannot mint a control by writing an evidence node to an id the
+    inventory lacks.
+    """
     from continuous_controls_monitoring.ports.writeback import UnknownControlError
 
     container = build_container(local_settings())

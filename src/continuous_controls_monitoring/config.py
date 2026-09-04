@@ -375,7 +375,7 @@ class Settings:
     #: that verifies perfectly. Empty means no anchor, which is right for the ephemeral
     #: ``:memory:`` store and wrong for anything durable.
     audit_anchor_path: str = ""
-    #: Base URL of the Hrz7 Human-Review console the R8 producer path submits to.
+    #: Base URL of the human-review-console Human-Review console the R8 producer path submits to.
     review_url: str = ""
     #: The audience the managed IAP identity adapter verifies the signed assertion AGAINST: the
     #: IAP-protected resource, ``/projects/<NUM>/global/backendServices/<ID>`` behind an HTTPS
@@ -392,12 +392,15 @@ class Settings:
     #: a trace resource path. Empty is valid: on Cloud Run the exporter resolves it
     #: from the metadata server.
     project_id: str = ""
-    #: Base URL of Rgc7's control-inventory READ API (the managed control-inventory adapter).
+    #: Base URL of obligations-control-mapping's control-inventory READ API (the managed
+    #: control-inventory adapter).
     rgc7_read_url: str = ""
-    #: Base URL of Rgc7's effectiveness WRITE-BACK API (the managed write-back adapter).
+    #: Base URL of obligations-control-mapping's effectiveness WRITE-BACK API (the managed
+    #: write-back adapter).
     rgc7_writeback_url: str = ""
-    #: Base URL of Rsk1's cloud control evidence-pack surface (the managed control-evidence
-    #: adapter reads the ex-Rsk2 module through this).
+    #: Base URL of compliance-advisory's cloud control evidence-pack surface (the managed
+    #: control-evidence
+    #: adapter reads the formerly the cloud control-mapping toolkit module through this).
     rsk1_evidence_url: str = ""
     #: The BigQuery dataset the effectiveness time-series is streamed to under the managed
     #: profile (``project.dataset``); the Looker view over it stays outside the gate.

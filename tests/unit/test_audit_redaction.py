@@ -1,23 +1,23 @@
 """Nothing redaction removes survives into any sink the service writes to (check C3).
 
-The service masked the audit summary and handed every OTHER sink the engine's raw result: the
-model prompt carried the evidence identifier verbatim (``build_prompt`` interpolates
+The service masked the audit summary and handed every OTHER sink the engine's raw result: the model
+prompt carried the evidence identifier verbatim (``build_prompt`` interpolates
 ``ControlFinding.detail``, which the engine builds as ``f"{record.identifier}: ..."``), and the
-Rgc7 write-back and the time-series export were handed the whole result object, summary, owner,
-findings and all. It also handed the audit event its citations untouched while masking the
-summary beside them. One masking step now sits where the graded result crosses out of the
-service, so every sink is covered once.
+obligations-control-mapping write-back and the time-series export were handed the whole result
+object, summary, owner, findings and all. It also handed the audit event its citations untouched
+while masking the summary beside them. One masking step now sits where the graded result crosses out
+of the service, so every sink is covered once.
 
 Two rules this suite holds, and they pull in opposite directions, which is why both are written
 down:
 
 * every CONTENT field is scanned: the audit summary, each citation's locator, title and snippet,
-  each finding's prose and evidence locator, and the FACTS block the model is handed. All of
-  them are built from raw upstream text wearing a structural-looking name.
-* the ATTRIBUTION and JOIN-KEY fields are not masked. ``AuditEvent.actor`` is the verified
-  principal and is an address by design, so a blanket scan over a whole audit row could never go
-  green; ``control_id`` and ``pack_id`` are the keys Rgc7 attaches evidence by, and a masked one
-  would detach the result from the control it grades.
+  each finding's prose and evidence locator, and the FACTS block the model is handed. All of them
+  are built from raw upstream text wearing a structural-looking name. * the ATTRIBUTION and JOIN-KEY
+  fields are not masked. ``AuditEvent.actor`` is the verified principal and is an address by design,
+  so a blanket scan over a whole audit row could never go green; ``control_id`` and ``pack_id`` are
+  the keys obligations-control-mapping attaches evidence by, and a masked one would detach the
+  result from the control it grades.
 
 Scored two ways, as the eval metric is: the shared pack's own rows, plus the planted literals,
 which still fire if a pattern row is broken.
@@ -82,7 +82,9 @@ class _SpyGeneration:
 
 
 class _SpyWriteback:
-    """Records the object the Rgc7 write-back PORT was handed, not the row an adapter kept."""
+    """Records the object the obligations-control-mapping write-back PORT was handed, not the row an
+    adapter kept.
+    """
 
     def __init__(self, inner: Any) -> None:
         self._inner = inner
@@ -106,7 +108,7 @@ class _SpyTimeSeries:
 
 
 def _wire_content(review: Any) -> dict[str, Any]:
-    """The serialised Hrz7 payload minus the one attribution field.
+    """The serialised human-review-console payload minus the one attribution field.
 
     ``maker`` is skipped for the same reason ``actor`` is on an audit row: it is the verified
     principal and an address by design, so a whole-payload scan could never go green. Everything
@@ -205,7 +207,7 @@ def test_no_identifier_reaches_the_routed_review_payload() -> None:
     assert pending, "the outbox is empty; this proves nothing"
     _assert_clean(
         json.dumps([_wire_content(entry.review) for entry in pending], sort_keys=True, default=str),
-        "the Hrz7 review payload",
+        "the human-review-console review payload",
     )
 
 
@@ -215,8 +217,10 @@ def test_the_whole_review_payload_is_redacted_not_only_its_narrative_fields() ->
     ``subject`` was masked and ``case_ref`` and ``source_key`` were not, so an identifier the
     payload had just removed from one field crossed the wire in the two beside it. This repo
     never mints a control id, but it does not constrain one either: the managed inventory adapter
-    builds every field of an ``InventoryControl`` out of whatever Rgc7's response carries
-    (``adapters/gcp/control_inventory.py``), so a subject naming a person is Rgc7's to produce and
+    builds every field of an ``InventoryControl`` out of whatever obligations-control-mapping's
+    response carries
+    (``adapters/gcp/control_inventory.py``), so a subject naming a person is
+    obligations-control-mapping's to produce and
     this boundary's to mask. The scan is over the SERIALISED payload rather than a chosen list of
     fields, so a field added later is covered by default.
     """
@@ -264,7 +268,8 @@ def test_redaction_changes_no_figure_the_engine_produced() -> None:
 
     The write-back and the export exist to carry the effectiveness figures, so the projection
     they are handed has to be figure-for-figure identical to the engine's own result. The join
-    keys are pinned here too: a masked ``control_id`` would be rejected by Rgc7, which only
+    keys are pinned here too: a masked ``control_id`` would be rejected by
+    obligations-control-mapping, which only
     attaches evidence to a control it already knows.
     """
     monitored, _container, _gen, writeback, timeseries = _drive()

@@ -1,4 +1,4 @@
-# Model card: Continuous Controls Monitoring (Aud2)
+# Model card: Continuous Controls Monitoring (`continuous-controls-monitoring`)
 
 This is a STARTER model card. It records the model boundary as built and the controls that must be
 completed before a managed deployment. The deterministic control-test engine is the system of
@@ -32,7 +32,7 @@ record; the model is a bounded, replaceable component that writes one paragraph.
   could not go red would be decoration.
 - Personal data is masked before the audit write, before the outbound review payload and before a
   tool result returns (`domain/pii.py`).
-- Every consequential result sets `requires_human_review` and is routed to Hrz7 (rule R8) in the
+- Every consequential result sets `requires_human_review` and is routed to `human-review-console` (rule R8) in the
   same call; nothing auto-executes.
 
 ## Adapters and profiles
@@ -50,7 +50,7 @@ record; the model is a bounded, replaceable component that writes one paragraph.
   settings key or environment variable for it. Confirm the id is served in your deployment region,
   pin the exact version, lift it into `config/settings.yaml`, and record it here. Gemini model ids
   are regional and an unavailable one fails at call time rather than at boot.
-- **Prompt-injection screening** (rule R1): the Hrz1 guardrail gateway is not bound, and this is
+- **Prompt-injection screening** (rule R1): the `agent-guardrail-gateway` is not bound, and this is
   the highest-priority item for THIS repo specifically. Evidence records can carry
   operator-written text, so untrusted free text can reach the fact block. The
   instruction-and-data split in `build_prompt` is a mitigation, not a screen. Fail closed to the
@@ -61,7 +61,7 @@ record; the model is a bounded, replaceable component that writes one paragraph.
   one. The fallback already exists (a rejected narration yields the engine summary); what is
   missing is a deliberate operator control.
 - **Evaluation of the live model**: the offline eval scores the deterministic pipeline with the
-  local narrator. Add a managed-profile run, registered with the Hrz4 promotion gate (P-08, rule
+  local narrator. Add a managed-profile run, registered with the `model-quality-gate` promotion gate (P-08, rule
   R5), that scores `groundedness` with the real model bound.
 - **Reasoning trace**: the audit record carries the validated narration and the engine's figures,
   not the prompt and reply pair. `COMPLIANCE.md` P-07 records that as owed.

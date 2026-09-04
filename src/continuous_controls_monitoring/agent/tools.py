@@ -83,7 +83,8 @@ def test_control(
     """Run one control's test now, by pack id, and route it for human review if it fails.
 
     The engine scores design and operating effectiveness deterministically, the result is
-    written back to Rgc7 and exported to the time-series, and a FAIL is routed to the control
+    written back to obligations-control-mapping and exported to the time-series, and a FAIL is
+    routed to the control
     owner via the human-review console (rule R8).
 
     Args:

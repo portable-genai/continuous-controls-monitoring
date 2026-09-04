@@ -27,13 +27,13 @@ A human, always, for anything consequential. `requires_human_review` and the cal
 tools all route in the same call that produced the result, and `tests/unit/test_review_routing.py`
 asserts the routing rather than the flag. Under the managed profile the router REFUSES when no
 console is configured, so a deployment cannot swallow an exception silently. The remediation that
-follows belongs to Aud3, not here.
+follows belongs to `issue-remediation-capa`, not here.
 
 ### Does the evidence trail close the loop back to the control library?
 
-Yes, and deliberately in one direction only. The control inventory is READ from Rgc7
+Yes, and deliberately in one direction only. The control inventory is READ from `obligations-control-mapping`
 (`ControlInventoryPort`), so this repo keeps no parallel catalog that could disagree with it, and
-the effectiveness result is WRITTEN BACK to Rgc7 as an evidence node
+the effectiveness result is WRITTEN BACK to `obligations-control-mapping` as an evidence node
 (`EffectivenessWritebackPort`), so a coverage figure there reflects what was actually tested
 rather than what was mapped. The result is also appended to an effectiveness time series, which is
 what lets a trend rather than a snapshot be shown.
@@ -90,8 +90,8 @@ reply is schema-checked and rejected if it introduces any figure the engine did 
 the engine summary as the fallback. The offline eval scores `effectiveness_accuracy`,
 `groundedness`, `pii_safety` and `pack_schema_validity` on every change. What is NOT yet in place:
 the managed model is not pinned to a confirmed model id and version, there is no token budget,
-rate limit or kill switch, no live-model eval run has been registered with the Hrz4 promotion
-gate, and prompt-injection screening through Hrz1 is not bound. That last one matters more here
+rate limit or kill switch, no live-model eval run has been registered with the `model-quality-gate` promotion
+gate, and prompt-injection screening through `agent-guardrail-gateway` is not bound. That last one matters more here
 than in most repos, because evidence records can carry operator-written text.
 
 ### Which regulations does this claim to satisfy?
@@ -105,7 +105,6 @@ packs is bank-owned policy rather than a vendor default to inherit unexamined.
 ### What is still open at go-live?
 
 The `Partial` and `TODO (repo owner)` rows in `COMPLIANCE.md`, each of which names exactly what is
-missing. The ones that need a risk acceptance if you go live without them: rule R1 (the Hrz1
-guardrail binding), rule R5 and P-08 (the Hrz4 metric bundle), P-10 (timeouts, circuit breaker and
+missing. The ones that need a risk acceptance if you go live without them: rule R1 (the `agent-guardrail-gateway` binding), rule R5 and P-08 (the `model-quality-gate` metric bundle), P-10 (timeouts, circuit breaker and
 a documented kill switch for the scanner and the outbound calls), the BigQuery dataset's region
 and encryption, and P-01's private-egress rule, which depends on your own network.

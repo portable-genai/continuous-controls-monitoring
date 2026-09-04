@@ -57,7 +57,7 @@ that arrived on an evidence record cannot escalate the model's authority. The re
 figure that is not in the grounding set `narration_facts` extracted from the engine's own result.
 A rejected narration is discarded and the caller falls back to the engine summary. The
 `groundedness` eval metric holds this at `>= 0.99` and `tests/unit/test_not_falsely_green.py`
-proves it can go red. Prompt-injection screening through the Hrz1 guardrail gateway is **not**
+proves it can go red. Prompt-injection screening through the `agent-guardrail-gateway` is **not**
 wired yet, which matters here because evidence records can carry operator-written text.
 
 ### Where does personal data go?
@@ -99,10 +99,10 @@ expression cannot tell apart.
 ### What is deliberately out of scope?
 
 - **Login.** This repo authenticates nobody itself: the platform in front of it does.
-- **Injection defence and output filtering.** Owned by Hrz1; not bound yet.
-- **The control inventory.** Owned by Rgc7; read, never copied.
-- **The remediation lifecycle after an exception.** Owned by Aud3.
+- **Injection defence and output filtering.** Owned by `agent-guardrail-gateway`; not bound yet.
+- **The control inventory.** Owned by `obligations-control-mapping`; read, never copied.
+- **The remediation lifecycle after an exception.** Owned by `issue-remediation-capa`.
 - **Network egress control.** VPC-SC governs access to Google APIs across perimeters, not
-  arbitrary internet egress. The private-egress rule that lets this service reach the Rgc7
-  register, the Rsk1 evidence packs and the Hrz7 console and nothing else is an adopter network
+  arbitrary internet egress. The private-egress rule that lets this service reach the `obligations-control-mapping`
+  register, the `compliance-advisory` evidence packs and the `human-review-console` and nothing else is an adopter network
   decision, called out in `COMPLIANCE.md` P-01.
