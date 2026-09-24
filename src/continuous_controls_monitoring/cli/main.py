@@ -13,12 +13,15 @@ from datetime import date
 
 from hex_service_kit.logging import configure_logging
 
+from ..adapters.controls import RecordingReviewRouter
 from ..config import Container, build_container
 from ..domain.models import MonitoredControl
 from ..domain.monitoring_service import MonitoringService
 
 
-def _service(container: Container) -> MonitoringService:
+def _service(
+    container: Container, review_router: RecordingReviewRouter | None = None
+) -> MonitoringService:
     return MonitoringService(
         audit=container.audit,
         inventory=container.control_inventory,
@@ -27,13 +30,13 @@ def _service(container: Container) -> MonitoringService:
         writeback=container.writeback,
         timeseries=container.timeseries,
         generation=container.generation,
-        review_router=container.review_router,
+        review_router=review_router if review_router is not None else container.review_router,
         tracer=container.tracer,
         policy=container.settings.policy,
     )
 
 
-def _print(monitored: MonitoredControl) -> None:
+def _print(monitored: MonitoredControl, routing: RecordingReviewRouter) -> None:
     result = monitored.result
     verdict = "PASS" if result.passed else "FAIL"
     print(f"{result.control_id} [{result.test_kind.value}] {verdict}")
@@ -43,8 +46,8 @@ def _print(monitored: MonitoredControl) -> None:
     )
     if monitored.writeback_ref:
         print(f"  written back: {monitored.writeback_ref}")
-    if monitored.review_ref:
-        print(f"  routed to human review: {monitored.review_ref}")
+    outcome = routing.outcome_for(monitored.result.pack_id).value
+    print(f"  human review hand-off : {outcome} {monitored.review_ref}".rstrip())
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -66,7 +69,9 @@ def main(argv: list[str] | None = None) -> int:
     container = build_container()
     # Idempotent: a process that is both an API app and a CLI configures once.
     configure_logging(container.settings.profile, service="continuous-controls-monitoring")
-    service = _service(container)
+    # Rule R8 on the CLI path too, and the same report of what happened to each hand-off.
+    routing = RecordingReviewRouter(container.review_router)
+    service = _service(container, routing)
     as_of = date.fromisoformat(args.as_of) if args.as_of else date.today()
 
     if args.command == "test":
@@ -74,13 +79,16 @@ def main(argv: list[str] | None = None) -> int:
         if pack is None:
             print(f"unknown pack_id: {args.pack_id}", file=sys.stderr)
             return 2
-        _print(service.evaluate_pack(pack, as_of=as_of, tenant=args.tenant, actor=args.actor))
+        _print(
+            service.evaluate_pack(pack, as_of=as_of, tenant=args.tenant, actor=args.actor),
+            routing,
+        )
         return 0
 
     if args.command == "run":
         result = service.run(as_of=as_of, tenant=args.tenant, actor=args.actor)
         for monitored in result.monitored:
-            _print(monitored)
+            _print(monitored, routing)
         print(f"\n{result.passed_count} passed, {len(result.exceptions)} exception(s)")
         return 0
 

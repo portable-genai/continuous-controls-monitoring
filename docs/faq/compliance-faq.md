@@ -25,8 +25,10 @@ Two rules make the rating mean something:
 A human, always, for anything consequential. `requires_human_review` and the call to
 `ReviewRouterPort.route` are one act, not a flag plus an intention: the API, the CLI and the agent
 tools all route in the same call that produced the result, and `tests/unit/test_review_routing.py`
-asserts the routing rather than the flag. Under the managed profile the router REFUSES when no
-console is configured, so a deployment cannot swallow an exception silently. The remediation that
+asserts the routing rather than the flag. Under the managed profile the service refuses to boot with
+routing on and no console configured, and a hand-off that fails at request time is reported as
+`review_routing: "failed"` and logged, so a deployment cannot swallow an exception silently.
+`CCM_REVIEW_ROUTING=off` switches routing off, stated and logged at startup. The remediation that
 follows belongs to `issue-remediation-capa`, not here.
 
 ### Does the evidence trail close the loop back to the control library?
