@@ -48,9 +48,9 @@ Four things, and none of them is code here:
    it is yours to scope.
 3. **The `obligations-control-mapping` endpoints.** A control inventory to read, and somewhere to write effectiveness
    results back as evidence nodes. This repo keeps no parallel catalog by design.
-4. **The review console.** An `human-review-console` deployment reachable at `HUMAN_REVIEW_URL`. The managed
-   router REFUSES to swallow an escalation when this is empty, so a fork cannot ship rule R8
-   unwired and green.
+4. **The review console.** An `human-review-console` deployment reachable at `HUMAN_REVIEW_URL`. With routing on
+   and this empty, the managed profile REFUSES TO BOOT, so a fork cannot ship rule R8 unwired
+   and green; `CCM_REVIEW_ROUTING=off` is the stated way to run without it.
 
 ### How do I add a new outbound dependency (a new port)?
 

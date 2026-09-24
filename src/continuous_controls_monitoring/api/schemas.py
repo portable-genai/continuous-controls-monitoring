@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
+from typing import Literal
+
 from pydantic import BaseModel
 
 from ..domain.models import ControlTestResult, MonitoredControl, MonitoringRun
@@ -57,9 +60,11 @@ class ControlTestResponse(BaseModel):
     findings: list[FindingModel] = []
     citations: list[CitationModel] = []
     #: Where the escalation WENT (rule R8): the human-review-console review id, or the local queue
-    #: reference.
-    #: Empty only when the control passed.
+    #: reference. Empty exactly when ``review_routing`` is not ``routed``.
     review_ref: str = ""
+    #: What happened to the hand-off: routed, failed, off or not_required. ``failed`` means the
+    #: result is NOT queued for review, and the console says so.
+    review_routing: Literal["routed", "failed", "off", "not_required"] = "not_required"
     #: Where the effectiveness evidence landed in obligations-control-mapping's graph, attached to
     #: the control.
     writeback_ref: str = ""
@@ -68,7 +73,9 @@ class ControlTestResponse(BaseModel):
     narration_body: str = ""
 
     @classmethod
-    def from_monitored(cls, monitored: MonitoredControl) -> ControlTestResponse:
+    def from_monitored(
+        cls, monitored: MonitoredControl, *, review_routing: str = "not_required"
+    ) -> ControlTestResponse:
         result = monitored.result
         return cls(
             control_id=result.control_id,
@@ -99,6 +106,7 @@ class ControlTestResponse(BaseModel):
                 for c in result.citations
             ],
             review_ref=monitored.review_ref,
+            review_routing=review_routing,  # type: ignore[arg-type]
             writeback_ref=monitored.writeback_ref,
             narration_headline=monitored.narration_headline,
             narration_body=monitored.narration_body,
@@ -110,16 +118,32 @@ class RunResponse(BaseModel):
     total: int
     passed: int
     exceptions: int
+    #: The whole run's hand-off outcome: any ``failed`` wins, then ``off``, then ``routed``.
+    #: Each result carries its own ``review_routing`` too.
+    review_routing: Literal["routed", "failed", "off", "not_required"] = "not_required"
     results: list[ControlTestResponse] = []
 
     @classmethod
-    def from_run(cls, run: MonitoringRun) -> RunResponse:
+    def from_run(
+        cls,
+        run: MonitoringRun,
+        *,
+        review_routing: str = "not_required",
+        routing_by_pack: Mapping[str, str] | None = None,
+    ) -> RunResponse:
+        by_pack = routing_by_pack or {}
         return cls(
             as_of=run.as_of.isoformat(),
             total=len(run.monitored),
             passed=run.passed_count,
             exceptions=len(run.exceptions),
-            results=[ControlTestResponse.from_monitored(m) for m in run.monitored],
+            review_routing=review_routing,  # type: ignore[arg-type]
+            results=[
+                ControlTestResponse.from_monitored(
+                    m, review_routing=by_pack.get(m.result.pack_id, "not_required")
+                )
+                for m in run.monitored
+            ],
         )
 
 

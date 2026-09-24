@@ -22,6 +22,7 @@ from typing import TYPE_CHECKING, Any
 from hex_service_kit.serialization import to_jsonable
 from pii_kit import redact
 
+from ..adapters.controls import RecordingReviewRouter
 from ..config import Container, Settings, build_container
 from ..domain.models import MonitoredControl
 from ..domain.monitoring_service import MonitoringService
@@ -35,9 +36,11 @@ if TYPE_CHECKING:  # pragma: no cover - typing only, never imported at runtime
 DEFAULT_ACTOR = "continuous-controls-monitoring-agent"
 
 
-def _service(settings: Settings | None) -> MonitoringService:
+def _service(settings: Settings | None) -> tuple[MonitoringService, RecordingReviewRouter]:
+    """The service, built around a recording wrapper so the tool can report each hand-off."""
     container: Container = build_container(settings)
-    return MonitoringService(
+    routing = RecordingReviewRouter(container.review_router)
+    service = MonitoringService(
         audit=container.audit,
         inventory=container.control_inventory,
         scanner=container.evidence_scanner,
@@ -45,10 +48,11 @@ def _service(settings: Settings | None) -> MonitoringService:
         writeback=container.writeback,
         timeseries=container.timeseries,
         generation=container.generation,
-        review_router=container.review_router,
+        review_router=routing,
         tracer=container.tracer,
         policy=container.settings.policy,
     )
+    return service, routing
 
 
 def _redacted(node: Any) -> Any:
@@ -67,10 +71,12 @@ def _redacted(node: Any) -> Any:
     return node
 
 
-def _payload(monitored: MonitoredControl) -> dict[str, Any]:
+def _payload(monitored: MonitoredControl, routing: RecordingReviewRouter) -> dict[str, Any]:
     payload = _redacted(to_jsonable(monitored))
     if not isinstance(payload, dict):  # pragma: no cover - dataclasses serialise to objects
         raise TypeError("a control-test result must serialise to a JSON object")
+    # Attached after the redaction pass: it is an outcome keyword, not narrative text.
+    payload["review_routing"] = routing.outcome_for(monitored.result.pack_id).value
     return payload
 
 
@@ -94,14 +100,16 @@ def test_control(
 
     Returns:
       A JSON-safe result dict with every string masked for personal data (P-04), including
-      ``review_ref`` (where a FAIL was routed) and ``writeback_ref`` (where the evidence landed).
+      ``review_ref`` (where a FAIL was routed), ``review_routing`` (routed, failed, off or
+      not_required; the reference is empty exactly when it is not ``routed``) and
+      ``writeback_ref`` (where the evidence landed).
     """
-    service = _service(settings)
+    service, routing = _service(settings)
     pack = next((p for p in service.packs if p.pack_id == pack_id), None)
     if pack is None:
         raise ValueError(f"unknown pack_id: {pack_id}")
     monitored = service.evaluate_pack(pack, as_of=date.today(), tenant=tenant, actor=actor)
-    return _payload(monitored)
+    return _payload(monitored, routing)
 
 
 def run_monitoring(
@@ -116,16 +124,18 @@ def run_monitoring(
       tenant: Tenant partition whose controls are tested.
 
     Returns:
-      A JSON-safe summary with the pass count, the exception count, and each control's result,
-      every string masked for personal data (P-04).
+      A JSON-safe summary with the pass count, the exception count, the run's
+      ``review_routing`` and each control's result with its own, every string masked for
+      personal data (P-04).
     """
-    service = _service(settings)
+    service, routing = _service(settings)
     run = service.run(as_of=date.today(), tenant=tenant, actor=actor)
     summary = {
         "as_of": run.as_of.isoformat(),
         "passed": run.passed_count,
         "exceptions": len(run.exceptions),
-        "results": [_payload(m) for m in run.monitored],
+        "review_routing": routing.outcome.value,
+        "results": [_payload(m, routing) for m in run.monitored],
     }
     masked = _redacted(summary)
     if not isinstance(masked, dict):  # pragma: no cover - dict in, dict out

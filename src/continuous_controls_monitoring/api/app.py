@@ -68,6 +68,7 @@ from hex_service_kit.web import (
     make_require_service_caller,
 )
 
+from ..adapters.controls import RecordingReviewRouter
 from ..config import (
     LOCAL_PROFILE,
     Container,
@@ -280,8 +281,15 @@ add_loopback_exposure_guard(
 )
 
 
-def _service(container: Container) -> MonitoringService:
-    """Wire the monitoring service from the container's bound ports."""
+def _service(
+    container: Container, review_router: RecordingReviewRouter | None = None
+) -> MonitoringService:
+    """Wire the monitoring service from the container's bound ports.
+
+    ``review_router`` is the per-request recording wrapper around ``container.review_router``,
+    so the response can say what happened to each hand-off (the fleet's runtime-control
+    contract). It wraps the bound router and never replaces it with a different one.
+    """
     return MonitoringService(
         audit=container.audit,
         inventory=container.control_inventory,
@@ -290,7 +298,7 @@ def _service(container: Container) -> MonitoringService:
         writeback=container.writeback,
         timeseries=container.timeseries,
         generation=container.generation,
-        review_router=container.review_router,
+        review_router=review_router if review_router is not None else container.review_router,
         tracer=container.tracer,
         policy=container.settings.policy,
     )
@@ -312,14 +320,17 @@ def test_control(
     service, in the same request that produced it.
     """
     container = _container()
-    service = _service(container)
+    # The hand-off never fails an already-graded, already-audited control test; the response
+    # says what happened to it instead (the fleet's runtime-control contract).
+    routing = RecordingReviewRouter(container.review_router)
+    service = _service(container, routing)
     pack = next((p for p in service.packs if p.pack_id == request.pack_id), None)
     if pack is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="unknown pack_id")
     monitored = service.evaluate_pack(
         pack, as_of=date.today(), tenant=_tenant_of(principal, container), actor=principal.actor
     )
-    return ControlTestResponse.from_monitored(monitored)
+    return ControlTestResponse.from_monitored(monitored, review_routing=routing.outcome.value)
 
 
 @app.post("/v1/run", response_model=RunResponse, tags=["artifacts"])
@@ -329,12 +340,19 @@ def run(
 ) -> RunResponse:
     """Run every configured control test for the caller's tenant and return the batch result."""
     container = _container()
-    service = _service(container)
+    routing = RecordingReviewRouter(container.review_router)
+    service = _service(container, routing)
     as_of = date.fromisoformat(request.as_of) if request.as_of else date.today()
     result = service.run(
         as_of=as_of, tenant=_tenant_of(principal, container), actor=principal.actor
     )
-    return RunResponse.from_run(result)
+    return RunResponse.from_run(
+        result,
+        review_routing=routing.outcome.value,
+        routing_by_pack={
+            m.result.pack_id: routing.outcome_for(m.result.pack_id).value for m in result.monitored
+        },
+    )
 
 
 @app.post("/v1/audit/ping", dependencies=[Depends(require_service_caller)], tags=["ops"])
