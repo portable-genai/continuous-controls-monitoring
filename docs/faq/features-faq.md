@@ -70,7 +70,7 @@ UI: this is a control-plane service and `make drop-ui` has been run.
 | Model and agent promotion | `model-quality-gate` AI quality and model risk | `eval/run_eval.py --mode gate` asks `model-quality-gate`; the offline smoke mode never promotes. |
 | Traces and the immutable audit sink | `agent-observability` agent observability | `AuditSinkPort` and `ObservabilityTracerPort`. |
 | Human review and maker-checker | `human-review-console` human review console | `ReviewRouterPort` over the shared `review-kit`. This repo produces exceptions; it does not render a queue. |
-| Prompt-injection defence and output filtering | `agent-guardrail-gateway` agent guardrail gateway | **not wired today.** It becomes mandatory the moment untrusted free text (an operator note on an evidence record) reaches the narrator (rule R1). |
+| Prompt-injection defence and output filtering | `agent-guardrail-gateway` agent guardrail gateway | `GuardrailPort`: the narration prompt is screened before the model reads it and the answer before it is used (rule R1); Model Armor under `gcp`. |
 | Grounded retrieval over an enterprise corpus | `enterprise-knowledge-base` | not wired; this service reasons over evidence records, not documents. |
 | Issue and CAPA lifecycle after an exception | `issue-remediation-capa` issue remediation and CAPA | this repo raises the exception; the remediation lifecycle belongs there. |
 
@@ -85,6 +85,6 @@ narrated claim, so a claim that stops being true fails a build rather than a mee
 ### What is not built yet?
 
 The honest list is [`../practices-audit.md`](../practices-audit.md) and the `TODO (repo owner)`
-rows in [`../../COMPLIANCE.md`](../../COMPLIANCE.md). The two that matter most for a production
-decision: the `agent-guardrail-gateway` binding before untrusted text reaches the narrator, and registering
-this repo's metric bundle with `model-quality-gate` so `--mode gate` has an authority to ask.
+rows in [`../../COMPLIANCE.md`](../../COMPLIANCE.md). The one that matters most for a production
+decision: registering this repo's metric bundle with `model-quality-gate` so `--mode gate` has an
+authority to ask.

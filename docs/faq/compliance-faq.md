@@ -92,9 +92,10 @@ reply is schema-checked and rejected if it introduces any figure the engine did 
 the engine summary as the fallback. The offline eval scores `effectiveness_accuracy`,
 `groundedness`, `pii_safety` and `pack_schema_validity` on every change. What is NOT yet in place:
 the managed model is not pinned to a confirmed model id and version, there is no token budget,
-rate limit or kill switch, no live-model eval run has been registered with the `model-quality-gate` promotion
-gate, and prompt-injection screening through `agent-guardrail-gateway` is not bound. That last one matters more here
-than in most repos, because evidence records can carry operator-written text.
+rate limit or kill switch, and no live-model eval run has been registered with the `model-quality-gate`
+promotion gate. Prompt-injection screening through `agent-guardrail-gateway` is in place (rule R1): the
+prompt and the model's answer are both screened, because evidence records can carry operator-written
+text, and a refused narration is audited `blocked` and discarded.
 
 ### Which regulations does this claim to satisfy?
 
@@ -107,6 +108,6 @@ packs is bank-owned policy rather than a vendor default to inherit unexamined.
 ### What is still open at go-live?
 
 The `Partial` and `TODO (repo owner)` rows in `COMPLIANCE.md`, each of which names exactly what is
-missing. The ones that need a risk acceptance if you go live without them: rule R1 (the `agent-guardrail-gateway` binding), rule R5 and P-08 (the `model-quality-gate` metric bundle), P-10 (timeouts, circuit breaker and
+missing. The ones that need a risk acceptance if you go live without them: rule R5 and P-08 (the `model-quality-gate` metric bundle), P-10 (timeouts, circuit breaker and
 a documented kill switch for the scanner and the outbound calls), the BigQuery dataset's region
 and encryption, and P-01's private-egress rule, which depends on your own network.

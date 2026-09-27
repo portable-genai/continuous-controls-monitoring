@@ -87,6 +87,7 @@ def _service(tracer: _RecordingTracer, scanner: object | None = None) -> Monitor
         writeback=container.writeback,
         timeseries=container.timeseries,
         generation=container.generation,
+        guardrail=container.guardrail,
         review_router=container.review_router,
         tracer=tracer,  # type: ignore[arg-type]
         policy=container.settings.policy,

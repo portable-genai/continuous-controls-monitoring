@@ -43,6 +43,21 @@ record; the model is a bounded, replaceable component that writes one paragraph.
 | `gcp` | `adapters/gcp/generation.py` (`VertexNarrationGenerator`) | Gemini via `google.generativeai`, imported lazily as the first statement of `generate` so an offline caller gets an ImportError at call time rather than at construction. Model id pinned in the module as `_MODEL`, currently `gemini-3.5-flash`, with a system instruction that states the no-new-figures rule. |
 | `onprem` | `adapters/onprem/generation.py` (`OnPremNarrationGenerator`) | Fail-fast placeholder: raises, naming the client-hosted model gateway to bind. |
 
+## Prompt-injection screening (rule R1)
+
+The `agent-guardrail-gateway` is bound as `ports/guardrail.py` (`GuardrailPort`), because
+evidence records can carry operator-written text, so untrusted free text can reach the fact
+block. The instruction-and-data split in `build_prompt` is a mitigation, never a substitute for a
+screen. `domain/monitoring_service.py::_narrate` screens the prompt INPUT before it reaches the
+model, and the model's raw response OUTPUT before it is validated or returned, each screen's text
+used exactly as given; a blocked direction is audited `blocked` and the narration is discarded
+and the engine summary stands, exactly like an ungrounded narration. A screen that cannot decide
+fails closed: audited, then the evaluation fails, never an unscreened narration. `local` binds a
+deterministic heuristic (`adapters/local/guardrail.py`); `gcp` binds Model Armor against a
+regional template (`adapters/gcp/guardrail.py`, `infra/terraform/model_armor.tf`); `onprem` is a
+fail-fast placeholder. `CCM_GUARDRAIL` switches it (default on), checked at boot under the
+managed profile.
+
 ## Remaining controls (TODO, repo owner)
 
 - **Model id, version and region** (P-07): `gemini-3.5-flash` is a module constant, not a
@@ -50,11 +65,6 @@ record; the model is a bounded, replaceable component that writes one paragraph.
   settings key or environment variable for it. Confirm the id is served in your deployment region,
   pin the exact version, lift it into `config/settings.yaml`, and record it here. Gemini model ids
   are regional and an unavailable one fails at call time rather than at boot.
-- **Prompt-injection screening** (rule R1): the `agent-guardrail-gateway` is not bound, and this is
-  the highest-priority item for THIS repo specifically. Evidence records can carry
-  operator-written text, so untrusted free text can reach the fact block. The
-  instruction-and-data split in `build_prompt` is a mitigation, not a screen. Fail closed to the
-  engine summary when the screen is unavailable.
 - **Budget, rate limit and a kill switch** (P-10, P-11): there is no per-tenant token budget, no
   request rate limit, and no switch that forces deterministic-only operation. A continuous
   monitor runs on a cadence, so an unbounded narration path is a cost surface as well as a risk

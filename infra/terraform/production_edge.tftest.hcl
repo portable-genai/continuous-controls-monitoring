@@ -18,6 +18,7 @@
 # it assert the audit-log name is derived rather than pinned by hand.
 
 mock_provider "google" {}
+mock_provider "google-beta" {}
 
 
 # worm_locked has NO DEFAULT (variables.tf): the audit bucket's lock is irreversible, so a plan
@@ -202,6 +203,11 @@ run "serving_edge_contract" {
   }
 
   assert {
+    condition     = one([for item in google_cloud_run_v2_service.api[0].template[0].containers[0].env : item.value if endswith(item.name, "_GUARDRAIL")]) == "true"
+    error_message = "Rule R1: the guardrail must be stated on the service by default, matching the reference posture."
+  }
+
+  assert {
     condition     = one([for item in google_cloud_run_v2_service.api[0].template[0].containers[0].env : item.value if item.name == "${local.render_env_prefix}_IAP_AUDIENCE"]) == var.iap_audience
     error_message = "The verified identity adapter must receive the exact audience it checks assertions against."
   }
@@ -348,6 +354,30 @@ run "edge_with_routing_stated_off_needs_no_console" {
   assert {
     condition     = one([for item in google_cloud_run_v2_service.api[0].template[0].containers[0].env : item.value if endswith(item.name, "_REVIEW_ROUTING")]) == "false"
     error_message = "a deployment that switches routing off must tell the service so, not leave it to infer from a missing console"
+  }
+}
+
+run "edge_with_guardrail_stated_off_is_told_so" {
+  command = plan
+
+  variables {
+    project_id                  = "fictional-agent-project"
+    enable_vpc_sc               = false
+    production_edge_enabled     = true
+    api_image                   = "example-docker.pkg.dev/fictional-agent-project/agent/api@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    service_domain              = "agent.fictional-bank.example"
+    human_review_url            = "https://review.fictional-bank.example"
+    guardrail_enabled           = false
+    alert_notification_channels = ["projects/fictional-agent-project/notificationChannels/123"]
+  }
+
+  expect_failures = [
+    check.managed_profile_is_implemented_before_serving,
+  ]
+
+  assert {
+    condition     = one([for item in google_cloud_run_v2_service.api[0].template[0].containers[0].env : item.value if endswith(item.name, "_GUARDRAIL")]) == "false"
+    error_message = "a deployment that switches the guardrail off must tell the service so, not leave it to infer from a missing template"
   }
 }
 

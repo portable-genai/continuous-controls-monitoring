@@ -279,6 +279,7 @@ class DemoRun:
             writeback=self.container.writeback,
             timeseries=self.container.timeseries,
             generation=self.container.generation,
+            guardrail=self.container.guardrail,
             review_router=self.container.review_router,
             tracer=self.container.tracer,
             policy=self.container.settings.policy,
@@ -816,6 +817,10 @@ def _exit_generation(container: Any) -> Any:
     return container.generation.generate("narrate this")
 
 
+def _exit_guardrail(container: Any) -> Any:
+    return container.guardrail.screen("narrate this", kernel.Direction.INPUT)
+
+
 def _exit_tracer(container: Any) -> Any:
     with container.tracer.span("exit.tour", action="portability"):
         return None
@@ -839,6 +844,7 @@ EXIT_CALLS: dict[str, Callable[[Any], Any]] = {
     "writeback": _exit_writeback,
     "timeseries": _exit_timeseries,
     "generation": _exit_generation,
+    "guardrail": _exit_guardrail,
 }
 
 

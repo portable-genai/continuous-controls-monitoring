@@ -31,6 +31,8 @@ from continuous_controls_monitoring.domain.kernel import (
     AuditEvent,
     Citation,
     Decision,
+    Direction,
+    GuardrailVerdict,
     Severity,
 )
 from continuous_controls_monitoring.domain.models import (
@@ -152,6 +154,19 @@ def _generation_answered(_adapter: Any, result: Any) -> bool:
     return validate_narration(result, CANONICAL_RESULT) is not None
 
 
+def _guardrail_invoke(adapter: Any) -> Any:
+    return adapter.screen(CANONICAL_PROMPT, Direction.INPUT)
+
+
+def _guardrail_answered(_adapter: Any, result: Any) -> bool:
+    # Answered means it screened the benign canonical prompt and allowed it through unchanged.
+    return (
+        isinstance(result, GuardrailVerdict)
+        and result.allowed
+        and result.sanitized_text == CANONICAL_PROMPT
+    )
+
+
 def _tracer_invoke(adapter: Any) -> Any:
     with adapter.span("canonical.unit", action="canonical"):
         adapter.record_token_usage(TokenUsage(input_tokens=7, output_tokens=2), "canonical-model")
@@ -224,6 +239,12 @@ CANONICAL_CALLS: dict[str, PortCase] = {
         answered=_generation_answered,
         managed_refusal=(ImportError,),
         detail="narrate an exception grounded in the engine facts",
+    ),
+    "guardrail": PortCase(
+        invoke=_guardrail_invoke,
+        answered=_guardrail_answered,
+        managed_refusal=(ImportError,),
+        detail="screen a generation call's prompt or response",
     ),
     "tracer": PortCase(
         invoke=_tracer_invoke,

@@ -96,8 +96,6 @@ the step keys and the `facts` dict the checks read.
 ### What is still open?
 
 [`../practices-audit.md`](../practices-audit.md) carries the per-check verdict and the work list.
-The two that matter most before production: binding the `agent-guardrail-gateway`, which matters more
-here than in most repos because evidence records can carry operator-written text that reaches the
-narrator, and registering this repo's metric bundle with `model-quality-gate` so `eval/run_eval.py --mode gate`
-has an authority to ask. The Terraform stack is written, validated and tested against a mocked
+The one that matters most before production: registering this repo's metric bundle with
+`model-quality-gate` so `eval/run_eval.py --mode gate` has an authority to ask. The Terraform stack is written, validated and tested against a mocked
 provider; it has never been applied.

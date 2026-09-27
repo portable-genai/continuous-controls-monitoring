@@ -87,6 +87,7 @@ def build_monitoring_service(container: Container) -> MonitoringService:
         writeback=container.writeback,
         timeseries=container.timeseries,
         generation=container.generation,
+        guardrail=container.guardrail,
         review_router=container.review_router,
         tracer=container.tracer,
         policy=container.settings.policy,

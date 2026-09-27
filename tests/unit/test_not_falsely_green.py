@@ -101,6 +101,7 @@ def test_pii_safety_is_green_on_the_record_the_real_service_writes() -> None:
         writeback=container.writeback,
         timeseries=container.timeseries,
         generation=container.generation,
+        guardrail=container.guardrail,
         review_router=container.review_router,
         tracer=container.tracer,
         policy=container.settings.policy,

@@ -48,6 +48,7 @@ def _service(settings: Settings | None) -> tuple[MonitoringService, RecordingRev
         writeback=container.writeback,
         timeseries=container.timeseries,
         generation=container.generation,
+        guardrail=container.guardrail,
         review_router=routing,
         tracer=container.tracer,
         policy=container.settings.policy,

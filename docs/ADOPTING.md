@@ -143,9 +143,11 @@ sharp because it both reads from and writes back to a sibling (see
 - `agent-registry`: this agent publishes its A2A card at
   `/.well-known/agent-card.json`; register it rather than inventing a discovery mechanism.
 
-The guardrail gateway (`agent-guardrail-gateway`) is **not** integrated today. It becomes mandatory the moment
-untrusted free text (an evidence record's operator note, say) reaches the narrator: see rule R1 in
-[`../COMPLIANCE.md`](../COMPLIANCE.md).
+The guardrail gateway (`agent-guardrail-gateway`) is bound as `ports/guardrail.py`, because untrusted
+free text (an evidence record's operator note, say) reaches the narrator. The narration prompt is
+screened before the model reads it and the model's answer before it is used; `gcp` screens through
+a regional Model Armor template that `infra/terraform/model_armor.tf` creates. See rule R1 in
+[`../COMPLIANCE.md`](../COMPLIANCE.md) and the guardrail section of [`runbook.md`](runbook.md).
 
 ## 6. Adoption checklist
 
