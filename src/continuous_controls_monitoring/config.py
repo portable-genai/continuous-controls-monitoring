@@ -470,9 +470,8 @@ class Settings:
     iap_audience: str = ""
     #: Tenant partition asserted on outbound reviews when the principal carries none.
     tenant: str = ""
-    #: GCP project the managed tracer exports to, and the one Cloud Logging names in
-    #: a trace resource path. Empty is valid: on Cloud Run the exporter resolves it
-    #: from the metadata server.
+    #: GCP project Cloud Logging names in a trace resource path. The tracer does not read it: spans
+    #: go through the agent-observability collector, which owns the destination project.
     project_id: str = ""
     #: Base URL of obligations-control-mapping's control-inventory READ API (the managed
     #: control-inventory adapter).
