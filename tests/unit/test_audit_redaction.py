@@ -144,6 +144,7 @@ def _drive() -> tuple[MonitoredControl, Container, _SpyGeneration, _SpyWriteback
         writeback=writeback,
         timeseries=timeseries,
         generation=generation,
+        guardrail=container.guardrail,
         review_router=container.review_router,
         tracer=container.tracer,
         policy=container.settings.policy,

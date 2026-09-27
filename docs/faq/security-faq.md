@@ -57,8 +57,11 @@ that arrived on an evidence record cannot escalate the model's authority. The re
 figure that is not in the grounding set `narration_facts` extracted from the engine's own result.
 A rejected narration is discarded and the caller falls back to the engine summary. The
 `groundedness` eval metric holds this at `>= 0.99` and `tests/unit/test_not_falsely_green.py`
-proves it can go red. Prompt-injection screening through the `agent-guardrail-gateway` is **not**
-wired yet, which matters here because evidence records can carry operator-written text.
+proves it can go red. Because evidence records can carry operator-written text, the prompt is also
+screened for prompt injection and jailbreaks before the model reads it, and the model's answer
+before it is used (`ports/guardrail.py`, Model Armor under `gcp`). A refused narration is audited
+`blocked` and discarded; a screen that cannot decide fails the evaluation rather than letting
+unscreened text through.
 
 ### Where does personal data go?
 
@@ -99,7 +102,8 @@ expression cannot tell apart.
 ### What is deliberately out of scope?
 
 - **Login.** This repo authenticates nobody itself: the platform in front of it does.
-- **Injection defence and output filtering.** Owned by `agent-guardrail-gateway`; not bound yet.
+- **Injection defence and output filtering.** Owned by `agent-guardrail-gateway`, consumed through
+  `ports/guardrail.py`; the Model Armor template itself is created by this repo's Terraform.
 - **The control inventory.** Owned by `obligations-control-mapping`; read, never copied.
 - **The remediation lifecycle after an exception.** Owned by `issue-remediation-capa`.
 - **Network egress control.** VPC-SC governs access to Google APIs across perimeters, not

@@ -214,6 +214,7 @@ def _drive_case(case: dict[str, object], container: Container, narration: Any) -
         writeback=container.writeback,
         timeseries=container.timeseries,
         generation=narration,
+        guardrail=container.guardrail,
         review_router=container.review_router,
         tracer=container.tracer,
         policy=container.settings.policy,

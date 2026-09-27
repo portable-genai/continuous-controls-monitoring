@@ -8,19 +8,21 @@
 #
 # Every filter below names a field this deployment actually emits:
 #   - critical_escalations : the managed audit adapter writes AuditEvent as a struct payload,
-#     so jsonPayload.decision is "escalated" or "allowed" (domain/kernel.py Decision) and
-#     jsonPayload.severity carries the band. A critical escalation is a maker-checker event a
-#     reviewer has to see; the deterministic core decided it, so it is never noise.
+#     so jsonPayload.decision is "escalated", "allowed" or "blocked" (domain/kernel.py
+#     Decision) and jsonPayload.severity carries the band. A critical escalation is a
+#     maker-checker event a reviewer has to see; the deterministic core decided it, so it is
+#     never noise.
 #   - sa_key_creation : an exportable service-account key was created. Org policy should have
 #     refused it (org_policy.tf), so this firing means the policy is off or was overridden.
 #   - vpc_sc_denials : a VPC Service Controls violation. In dry run this is the evidence used
 #     to decide whether enforcing would break a legitimate path.
 #   - cmek_changes : a CMEK key destroy or update. Key material changing is a P-09 event.
 #   - edge_denials : Cloud Armor denied or throttled a request at the edge.
-#
-# There is deliberately no guardrail-block metric. A rendered repo binds no guardrail port yet
-# (COMPLIANCE rule R1 records that as owed), and a metric whose filter can never match is a
-# green light nobody earned. Add it in the same commit that binds the guardrail.
+#   - guardrail_blocks : the guardrail (rule R1) refused a narration prompt or response, or could
+#     not decide. domain/monitoring_service.py audits every refusal with jsonPayload.decision
+#     "blocked" (domain/kernel.py Decision.BLOCKED) before the narration is discarded, so a
+#     prompt-injection attempt carried in estate data, or a Model Armor outage, is surfaced
+#     rather than left as an absent write-up.
 #
 # Alert policies are always created; var.alert_notification_channels attaches the channels.
 #
@@ -31,6 +33,10 @@ locals {
     critical_escalations = {
       description = "Critical-severity escalation recorded in the app audit log (maker-checker, P-06)"
       filter      = "logName=\"projects/${var.project_id}/logs/${local.audit_log_name}\" AND jsonPayload.decision=\"escalated\" AND jsonPayload.severity=\"critical\""
+    }
+    guardrail_blocks = {
+      description = "Guardrail refused a narration prompt or response (rule R1)"
+      filter      = "logName=\"projects/${var.project_id}/logs/${local.audit_log_name}\" AND jsonPayload.decision=\"blocked\""
     }
     sa_key_creation = {
       description = "Service-account key created (org policy should forbid this)"

@@ -30,6 +30,7 @@ def _service(
         writeback=container.writeback,
         timeseries=container.timeseries,
         generation=container.generation,
+        guardrail=container.guardrail,
         review_router=review_router if review_router is not None else container.review_router,
         tracer=container.tracer,
         policy=container.settings.policy,

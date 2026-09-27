@@ -16,6 +16,21 @@ the discipline requires:
 
 The model touches only step 6, and even there its output is discarded unless it is grounded in
 the engine's own figures.
+
+Rule R1: the guardrail screens BOTH directions of that one generation call. The prompt is
+screened INPUT as sent, whole, before it reaches the model: it is the only text the model reads,
+and every field that could carry caller- or estate-controlled prose (control id, owner, finding
+detail) reaches the model only inside it. The model's raw response is screened OUTPUT before it
+is validated, audited or returned. The text each screen hands back is the text used from then
+on, exactly as given, never the unscreened original.
+
+The narration is OPTIONAL by design: a control test's verdict, audit record, write-back and
+review hand-off never depend on it, and a narration that is ungrounded or malformed is already
+discarded to empty strings. A guardrail block takes the same fixed fallback, after an audited
+``Decision.BLOCKED`` record, so no partial or unscreened narration is ever returned. A guardrail
+that cannot decide (its backend errored or timed out) fails CLOSED: the refusal is audited
+BLOCKED when the audit sink can take it, and the guardrail's own error then reaches the caller,
+exactly as a failing generation call already does.
 """
 
 from __future__ import annotations
@@ -32,11 +47,19 @@ from ..ports.control_evidence import ControlEvidencePort
 from ..ports.control_inventory import ControlInventoryPort
 from ..ports.evidence_scanner import EvidenceScannerPort
 from ..ports.generation import GenerationPort
+from ..ports.guardrail import GuardrailPort
 from ..ports.observability import ObservabilityTracerPort
 from ..ports.review_router import ReviewRouterPort
 from ..ports.timeseries import TimeSeriesExportPort
 from ..ports.writeback import EffectivenessWritebackPort
-from .kernel import AuditEvent, redacted_citations, utcnow
+from .kernel import (
+    AuditEvent,
+    Decision,
+    Direction,
+    GuardrailVerdict,
+    redacted_citations,
+    utcnow,
+)
 from .models import (
     ControlFinding,
     ControlTestPack,
@@ -125,6 +148,7 @@ class MonitoringService:
         writeback: EffectivenessWritebackPort,
         timeseries: TimeSeriesExportPort,
         generation: GenerationPort,
+        guardrail: GuardrailPort,
         review_router: ReviewRouterPort,
         tracer: ObservabilityTracerPort,
         policy: Mapping[str, Any] | None = None,
@@ -136,6 +160,7 @@ class MonitoringService:
         self._writeback = writeback
         self._timeseries = timeseries
         self._generation = generation
+        self._guardrail = guardrail
         self._review = review_router
         self._tracer = tracer
         self._engine = ControlTestEngine()
@@ -211,7 +236,7 @@ class MonitoringService:
                 writeback_ref = self._writeback.append_result(outbound, tenant=tenant)
             self._timeseries.export(outbound)
 
-            headline, body = self._narrate(outbound)
+            headline, body = self._narrate(outbound, actor=actor)
 
             review_ref = ""
             if result.requires_human_review:
@@ -248,12 +273,16 @@ class MonitoringService:
             )
         )
 
-    def _narrate(self, result: ControlTestResult) -> tuple[str, str]:
+    def _narrate(self, result: ControlTestResult, *, actor: str) -> tuple[str, str]:
         """Draft and validate an exception narration; return empty strings when discarded.
 
-        Only exceptions are narrated: a passing control needs no write-up. The model output is
-        validated against the schema and the groundedness check, and DISCARDED (empty strings)
-        on any failure, so the figure that reaches a reader is always the engine's.
+        Only exceptions are narrated: a passing control needs no write-up, so a passing control
+        is never screened either. Rule R1: the prompt is screened INPUT before it reaches the
+        model, and the model's raw response is screened OUTPUT before it is validated or
+        returned. Either direction blocked is audited BLOCKED and DISCARDED (empty strings), the
+        same fixed fallback an ungrounded or malformed narration already takes, so the figure
+        that reaches a reader is always the engine's and a guardrail block never changes the
+        control test's own verdict.
 
         ``result`` is the :func:`redacted_result` projection, so the prompt's FACTS block carries
         masked finding prose. Grounding is checked against the SAME projection, which is what
@@ -263,8 +292,67 @@ class MonitoringService:
         """
         if not result.requires_human_review:
             return ("", "")
-        raw = self._generation.generate(build_prompt(result))
-        narration = validate_narration(raw, result)
+        prompt = self._screen(build_prompt(result), Direction.INPUT, result=result, actor=actor)
+        if prompt is None:
+            return ("", "")
+        raw = self._generation.generate(prompt)
+        screened = self._screen(raw, Direction.OUTPUT, result=result, actor=actor)
+        if screened is None:
+            return ("", "")
+        narration = validate_narration(screened, result)
         if narration is None:
             return ("", "")
         return (narration.headline, narration.body)
+
+    def _screen(
+        self, text: str, direction: Direction, *, result: ControlTestResult, actor: str
+    ) -> str | None:
+        """Screen one text in one direction; the text to use from here on, or ``None`` if refused.
+
+        The returned text is the verdict's ``sanitized_text`` exactly as given, including an
+        empty string: a screen that redacted everything has not asked for the original back. A
+        block returns ``None`` after an audited BLOCKED record. A guardrail that raised instead
+        of deciding is audited BLOCKED too, and its error then propagates: fail closed, never
+        an unscreened narration.
+        """
+        try:
+            verdict: GuardrailVerdict = self._guardrail.screen(text, direction)
+        except Exception as exc:
+            reason = f"guardrail unavailable ({type(exc).__name__})"
+            try:
+                self._audit_blocked(result, direction, reason, actor=actor)
+            except Exception as audit_exc:
+                exc.add_note(f"the BLOCKED audit record could not be written: {audit_exc!r}")
+            raise
+        if not verdict.allowed or verdict.sanitized_text is None:
+            reason = verdict.reason or f"narration {direction.value} blocked by guardrail"
+            self._audit_blocked(result, direction, reason, actor=actor)
+            return None
+        return verdict.sanitized_text
+
+    def _audit_blocked(
+        self, result: ControlTestResult, direction: Direction, reason: str, *, actor: str
+    ) -> None:
+        """Audit a guardrail refusal BEFORE the narration is discarded (rule R1/R2).
+
+        Never carries the refused text: only that a refusal happened, for which control, in
+        which direction, and why. A refused narration is a security-relevant event the WORM
+        trail must hold even though the control test itself completes normally, with its
+        narration simply absent. The severity is the engine's band, which was graded before the
+        narration was ever drafted.
+        """
+        summary = redact(
+            f"{result.control_id}: narration blocked ({direction.value}): {reason}",
+            PII_PATTERNS,
+        )
+        self._audit.record(
+            AuditEvent(
+                action="control_test_narration",
+                actor=actor,
+                decision=Decision.BLOCKED,
+                severity=result.severity,
+                redacted_summary=summary,
+                citations=(),
+                timestamp=utcnow(),
+            )
+        )

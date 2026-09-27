@@ -19,6 +19,7 @@ from .control_evidence import ControlEvidencePort
 from .control_inventory import ControlInventoryPort, CrossTenantError
 from .evidence_scanner import EvidenceScannerPort
 from .generation import GenerationPort
+from .guardrail import GuardrailPort
 from .identity import (
     CLIENT_ASSERTED,
     END_USER_AUTH_ATTR,
@@ -48,6 +49,7 @@ PORT_PROTOCOLS: dict[str, type] = {
     "writeback": EffectivenessWritebackPort,
     "timeseries": TimeSeriesExportPort,
     "generation": GenerationPort,
+    "guardrail": GuardrailPort,
     "tracer": ObservabilityTracerPort,
     "evaluation": EvaluationGatePort,
 }
@@ -70,6 +72,7 @@ __all__ = [
     "EndUserAuthUnavailableError",
     "EvidenceScannerPort",
     "GenerationPort",
+    "GuardrailPort",
     "IdentityPort",
     "ReviewRouterPort",
     "TimeSeriesExportPort",

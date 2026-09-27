@@ -46,6 +46,18 @@ iap_audience: ${CCM_IAP_AUDIENCE:-}
 # deliberately distinct from this service's own inbound CCM_S2S_TOKEN.
 review_url: ${HUMAN_REVIEW_URL:-}
 
+# Rule R1: the Model Armor template the `gcp` guardrail adapter screens the one generation call
+# this repo narrates through (input and output) against, and the regional host it calls (never
+# the global endpoint, P-05). `template_id` matches the template `infra/terraform/model_armor.tf`
+# creates. Guardrail on (CCM_GUARDRAIL, unset means on) under the managed profile REFUSES TO BOOT
+# when template_id is empty and the bound adapter is ModelArmorGuardrailAdapter;
+# CCM_GUARDRAIL=off states the guardrail off.
+model_armor:
+  template_id: ${CCM_MODEL_ARMOR_TEMPLATE:-continuous-controls-monitoring-guardrail}
+  host: ${CCM_MODEL_ARMOR_HOST:-modelarmor.asia-southeast1.rep.googleapis.com}
+  # The deadline on every sanitize call. A timeout fails CLOSED (audited, then refused).
+  timeout_seconds: 10.0
+
 # obligations-control-mapping is the SINGLE SYSTEM OF RECORD for the control inventory: continuous-controls-monitoring READS it and WRITES
 # effectiveness results back, and keeps no parallel catalog. These are the managed (gcp) adapter
 # endpoints; the offline profile serves a deterministic fixture estate instead. Three-state:
@@ -88,6 +100,13 @@ adapters:
     local: continuous_controls_monitoring.adapters.local.audit:LocalAuditAdapter
     gcp: continuous_controls_monitoring.adapters.gcp.audit:CloudAuditAdapter
     onprem: continuous_controls_monitoring.adapters.onprem.audit:OnPremAuditAdapter
+  # Rule R1: screens the one generation call this repo narrates through, input (before) and
+  # output (after). local is a deterministic heuristic stand-in; there is no offline emulator
+  # for Model Armor.
+  guardrail:
+    local: continuous_controls_monitoring.adapters.local.guardrail:LocalHeuristicGuardrailAdapter
+    gcp: continuous_controls_monitoring.adapters.gcp.guardrail:ModelArmorGuardrailAdapter
+    onprem: continuous_controls_monitoring.adapters.onprem.guardrail:OnPremGuardrailAdapter
   identity:
     local: continuous_controls_monitoring.adapters.local.identity:LocalIdentityAdapter
     gcp: continuous_controls_monitoring.adapters.gcp.identity:IapIdentityAdapter

@@ -1,9 +1,11 @@
-"""The runtime-control seam: what switched-off routing binds, and what a caller reports.
+"""The runtime-control seam: what switched-off controls bind, and what a caller reports.
 
-**Disabled adapter.** When a deployment switches review routing off
+**Disabled adapters.** When a deployment switches review routing off
 (``CCM_REVIEW_ROUTING=off``), the container binds :class:`DisabledReviewRouter` instead
 of the profile's class. It satisfies the port and submits nothing, and the container logs the
-posture at startup.
+posture at startup. Switching the guardrail off (``CCM_GUARDRAIL=off``) binds
+:class:`DisabledGuardrail` the same way: it satisfies
+:class:`~..ports.guardrail.GuardrailPort` and allows everything, unchanged.
 
 **Recording wrapper.** The domain service routes each failed control test itself, so every
 caller (the two API routes, the two agent tools, the two CLI commands) builds its service
@@ -20,9 +22,24 @@ import logging
 from enum import StrEnum
 
 from ..config import Settings
+from ..domain.kernel import Direction, GuardrailVerdict
 from ..domain.models import ControlTestResult
 
 _log = logging.getLogger(__name__)
+
+
+class DisabledGuardrail:
+    """GuardrailPort with the guardrail switched off: allows everything, text unchanged."""
+
+    enabled = False
+
+    def __init__(self, settings: Settings) -> None:
+        self._settings = settings
+
+    def screen(self, text: str, direction: Direction) -> GuardrailVerdict:
+        return GuardrailVerdict(
+            allowed=True, direction=direction, sanitized_text=text, reason="guardrail off"
+        )
 
 
 class ReviewRouting(StrEnum):

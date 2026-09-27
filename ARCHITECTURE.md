@@ -24,7 +24,8 @@ startup and Terraform serving authorization until its live integration test exis
   around the engine), `pii.py` (the jurisdiction pattern selection + order).
 - `ports/` : `@runtime_checkable` Protocols (`AuditSinkPort`, `ReviewRouterPort`,
   `ControlInventoryPort`, `EvidenceScannerPort`, `ControlEvidencePort`, `EffectivenessWritebackPort`,
-  `TimeSeriesExportPort`, `GenerationPort`; identity uses the commons `IdentityPort`), re-exported
+  `TimeSeriesExportPort`, `GenerationPort`, `GuardrailPort`; identity uses the commons
+  `IdentityPort`), re-exported
   once with the `PORT_PROTOCOLS` map. `identity.py` adds
   this service's own identity vocabulary: what an adapter DECLARES about the end-user
   authentication it provides (`VERIFIED` / `CLIENT_ASSERTED` / `UNIMPLEMENTED`), which is what the
@@ -64,8 +65,10 @@ behavioural suites cannot quietly assert different things.
 read the control from `obligations-control-mapping` (never a parallel catalog) -> gather evidence (scanner + `compliance-advisory` packs)
 -> deterministic `ControlTestEngine` scores design and operating effectiveness with an explicit
 `as_of` -> redact-before-audit (P-04) already-redacted WORM write -> write the result back to
-`obligations-control-mapping` as an evidence node and export the time-series row -> narrate an exception (schema-validated,
-discarded unless grounded) -> **route every exception to the control owner via `human-review-console` (R8)**. The
+`obligations-control-mapping` as an evidence node and export the time-series row -> narrate an exception (the
+narration prompt screened INPUT before the model runs and its response screened OUTPUT before
+validation, rule R1; either direction blocked is audited `blocked` and discarded exactly like an
+ungrounded narration, and a screen that cannot decide fails the evaluation) -> **route every exception to the control owner via `human-review-console` (R8)**. The
 audit actor and the review maker are both the verified `Principal`, never the request body.
 Routing happens in the same call that produced the result, on the API, CLI and agent surfaces
 alike, so an exception never depends on a later job that may not exist. A control fails when any
@@ -84,6 +87,7 @@ silent pass.
 | `EffectivenessWritebackPort` | in-memory `obligations-control-mapping` graph (inspectable) | `obligations-control-mapping` write-back over S2S (lazy) | placeholder |
 | `TimeSeriesExportPort` | in-memory rows (inspectable) | BigQuery (lazy) | placeholder |
 | `GenerationPort` | deterministic grounded narrator | Gemini (lazy) | placeholder |
+| `GuardrailPort` | heuristic prompt-injection/jailbreak screen | Model Armor (lazy) | placeholder |
 
 The on-prem placeholders RAISE. A review router that silently returned would convert every
 consequential result into an unreviewed one, which is worse than a missing feature.
